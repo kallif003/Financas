@@ -52,6 +52,8 @@ export const Span = styled.span`
 export const ContainerTitle = styled.div`
 height: 3rem;
 display: flex;
-
-
+`
+export const ContainerButtons = styled.div`
+display: flex;
+flex-direction: column;
 `

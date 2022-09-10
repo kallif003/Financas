@@ -8,6 +8,6 @@ color: #fff;
 export const SubtitleLogin = styled.h3`
 font-size: 0.7rem;
 color: #ddd;
-margin-bottom: 1rem
+margin-bottom: 1.5rem
 `
 

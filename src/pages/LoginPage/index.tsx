@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react"
-import { ButtonLogin, SecondaryButton } from '../../components/buttons'
-import { InputLogin } from '../../components/inputs'
-import { TitleLogin, SubtitleLogin, Message } from '../../components/typography'
+import { ButtonLogin, SecondaryButton } from '../../components/atomos/buttons'
+import { InputLogin } from '../../components/atomos/inputs'
+import { TitleLogin, SubtitleLogin, Message } from '../../components/atomos/typography'
 import { mdiCashCheck } from '@mdi/js';
 import { AuthContext } from "../../contexts/auth"
 import Icon from '@mdi/react'

@@ -1,0 +1,1 @@
+export { TitleLogin, SubtitleLogin, Message, Text, Text2 } from './typography'

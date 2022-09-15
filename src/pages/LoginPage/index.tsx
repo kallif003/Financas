@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react"
-import { ButtonLogin, SecondaryButton } from '../../components/atomos/buttons'
+import { Button, SecondaryButton } from '../../components/atomos/buttons'
 import { InputLogin } from '../../components/atomos/inputs'
 import { TitleLogin, SubtitleLogin, Message } from '../../components/atomos/typography'
 import { mdiCashCheck } from '@mdi/js';
@@ -69,14 +69,14 @@ const Login = () => {
                 </WrapInput>
                 <Message className={msg === "" ? "hidden" : "block"}>{msg}</Message>
                 <ContainerButtons>
-                    <ButtonLogin onClick={access}
+                    <Button onClick={access}
                         className={recoverPassword === false ? "block" : "hidden"}>
                         {type === 'login' ? "Entrar" : "Cadastrar"}
-                    </ButtonLogin>
-                    <ButtonLogin onClick={recover}
+                    </Button>
+                    <Button onClick={recover}
                         className={recoverPassword === true ? "block" : "hidden"}>
                         Recuperar
-                    </ButtonLogin>
+                    </Button>
                     <SecondaryButton color={'#fff'} size={0.8}
                         onClick={() => setType((type) =>
                             (type === "login" ? "cadastrar" : "login"))}

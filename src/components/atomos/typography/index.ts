@@ -1,1 +1,1 @@
-export { TitleLogin, SubtitleLogin, Message, Text, Text2 } from './typography'
+export { TitleLogin, SubtitleLogin, Message, Text } from './typography'

@@ -24,11 +24,3 @@ font-size: ${(props) => props.size}rem;
 font-weight: bold;
 
 `
-export const Text2 = styled.p.attrs(
-    (props: { color: string, size: number }) => props
-)`
-color: ${(props) => props.color};
-font-size: ${(props) => props.size}rem;
-font-weight: bold;
-margin-left: 0.2rem;
-`

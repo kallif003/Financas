@@ -16,3 +16,11 @@ color: red;
 margin-bottom: 1.5rem;
 font-weight: bold;
 `
+export const Text = styled.p.attrs(
+    (props: { color: string, size: number }) => props
+)`
+color: ${(props) => props.color};
+font-size: ${(props) => props.size}rem;
+font-weight: bold;
+
+`

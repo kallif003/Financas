@@ -7,7 +7,7 @@ export const AuthContext = createContext({})
 function AuthProvider({ children }: any) {
     const [msg, setMsg] = useState("")
     const [user, setUser] = useState("")
-    const [nameLists, setNameLists] = useState({})
+    const [email, setEmail] = useState({})
     const router = useRouter()
 
     async function signUp(email: string, password: string) {
@@ -27,14 +27,14 @@ function AuthProvider({ children }: any) {
             .then((value: any) => {
                 router.push("./Home")
                 setUser(value.user.uid)
-                console.log(user)
+                setEmail(value.user.email)
+                console.log("🚀 ~ file: auth.tsx ~ line 31 ~ .then ~ value.user.email", value.user.email)
             })
             .catch((error) => {
                 setMsg("Email ou senha invalidos")
                 setTimeout(() => {
                     setMsg("")
                 }, 20000)
-                // router.push("./LoginPage")
             })
 
     }
@@ -61,31 +61,31 @@ function AuthProvider({ children }: any) {
             .auth()
             .signOut()
             .then(() => {
-
+                router.push("./LoginPage")
             })
     }
 
-    async function getUser() {
-        await firebase
-            .database()
-            .ref("Listas")
-            .child(user)
-            .on("value", (snapshot) => {
-                setNameLists([])
+    // async function getUser() {
+    //     await firebase
+    //         .database()
+    //         .ref("Listas")
+    //         .child(user)
+    //         .on("value", (snapshot) => {
+    //             setemail([])
 
-                snapshot.forEach((childItem) => {
-                    const data = {
-                        key: childItem.key,
-                        lista: childItem.key,
-                    }
-                    setNameLists((old: never[]) => [...old, data])
-                })
-            })
-    }
+    //             snapshot.forEach((childItem) => {
+    //                 const data = {
+    //                     key: childItem.key,
+    //                     lista: childItem.key,
+    //                 }
+    //                 setemail((old: never[]) => [...old, data])
+    //             })
+    //         })
+    // }
 
     return (
         <AuthContext.Provider
-            value={{ user, msg, login, signUp, logout, nameLists, passwordReset }}>
+            value={{ user, msg, login, signUp, logout, email, passwordReset }}>
             {children}
         </AuthContext.Provider>
     )

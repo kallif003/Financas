@@ -1,10 +1,12 @@
 import styled from "styled-components";
 
-export const Button = styled.button`
+export const Button = styled.button.attrs(
+	(props: { width: number, height: number, background: string }) => props
+)`
 display: flex;
-background: #FFD365;
-width: 10rem;
-height: 2rem;
+background: ${(props) => props.background};
+width: ${(props) => props.width}rem;
+height: ${(props) => props.height}rem;
 border-color: #ddd;
 border-width: 1px;
 border-radius:  0.5rem;

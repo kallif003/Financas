@@ -70,10 +70,16 @@ const Login = () => {
                 <Message className={msg === "" ? "hidden" : "block"}>{msg}</Message>
                 <ContainerButtons>
                     <Button onClick={access}
+                        width={10}
+                        height={2}
+                        background={"#FFD365"}
                         className={recoverPassword === false ? "block" : "hidden"}>
                         {type === 'login' ? "Entrar" : "Cadastrar"}
                     </Button>
                     <Button onClick={recover}
+                        width={10}
+                        height={2}
+                        background={"#FFD365"}
                         className={recoverPassword === true ? "block" : "hidden"}>
                         Recuperar
                     </Button>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Menu } from "antd";
-import { SecondaryButton, Button } from "../../atomos/buttons"
+import { Button } from "../../atomos/buttons"
 import { Text } from "../../atomos/typography"
 import PropTypes from 'prop-types';
 
@@ -60,14 +60,20 @@ const MenuComponent = (props: any) => {
                                             background: "#00C897",
                                             margin: '0px'
                                         }}>
-
-                                    <SecondaryButton>
-                                        <Text color="#fff" size={1}
+                                    {i.type === 'Lançamentos' ? (
+                                        <Button
+                                            width={5}
+                                            height={1.5}
                                             className="hover:text-[#FFD365]"
                                         >
                                             {i.item}
+                                        </Button>
+                                    ) : (
+                                        <Text color="#fff" size={1}>
+                                            {i.item}
                                         </Text>
-                                    </SecondaryButton>
+                                    )}
+
                                 </Menu.Item>
                             ) : (null)
                         ))}
@@ -79,7 +85,14 @@ const MenuComponent = (props: any) => {
                                         margin: '0px'
                                     }}
                             >
-                                <Button onClick={() => props.showModal()}>Cadastrar</Button>
+                                <Button
+                                    width={5}
+                                    height={1.5}
+                                    onClick={() => props.showModal()}
+                                    className="hover:text-[#FFD365]"
+                                >
+                                    Cadastrar
+                                </Button>
                             </Menu.Item>
                         ) : null
                         }
@@ -91,7 +104,14 @@ const MenuComponent = (props: any) => {
                                         margin: '0px'
                                     }}
                             >
-                                <Button onClick={() => props.showModal()}>Cadastrar</Button>
+                                <Button
+                                    width={5}
+                                    height={1.5}
+                                    onClick={() => props.showModal()}
+                                    className="hover:text-[#FFD365]"
+                                >
+                                    Cadastrar
+                                </Button>
                             </Menu.Item>
                         ) : null
                         }

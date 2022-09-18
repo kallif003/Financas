@@ -1,9 +1,14 @@
 import React from "react";
 import Header from "../../components/moleculas/header";
+import Releases from "../../components/organismos/myReleases";
+
 
 const Home = () => {
     return (
-        <Header />
+        <div>
+            <Header />
+            <Releases />
+        </div>
     )
 }
 

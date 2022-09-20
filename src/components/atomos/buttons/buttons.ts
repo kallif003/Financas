@@ -1,7 +1,13 @@
 import styled from "styled-components";
 
 export const Button = styled.button.attrs(
-	(props: { width: number, height: number, background: string }) => props
+	(props: {
+		width: number,
+		height: number,
+		background: string,
+		justify: string,
+		align: string
+	}) => props
 )`
 display: flex;
 background: ${(props) => props.background};
@@ -13,8 +19,9 @@ border-radius:  0.5rem;
 color: #fff;
 font-weight: bold;
 margin-bottom: 0.5rem;
-justify-content: center;
-align-items: center;
+justify-content: ${(props) => props.justify || "center"};
+align-items: ${(props) => props.align || "center"};
+
 :active {
 		transform: scale(0.9);
 	}

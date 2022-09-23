@@ -1,6 +1,9 @@
 import { createContext, useState } from "react"
 import firebase from "../connection/firebaseConnection"
 import { useRouter } from "next/router"
+import { notification } from "antd"
+import { CloseCircleOutlined } from '@ant-design/icons';
+import { SmileOutlined } from '@ant-design/icons';
 
 export const AuthContext = createContext({})
 
@@ -14,7 +17,7 @@ function AuthProvider({ children }: any) {
         await firebase
             .auth()
             .createUserWithEmailAndPassword(email, password)
-            .then((user) => {
+            .then(() => {
                 router.push("./Home")
             })
 
@@ -28,7 +31,6 @@ function AuthProvider({ children }: any) {
                 router.push("./Home")
                 setUser(value.user.uid)
                 setEmail(value.user.email)
-                console.log("🚀 ~ file: auth.tsx ~ line 31 ~ .then ~ value.user.email", value.user.email)
             })
             .catch((error) => {
                 setMsg("Email ou senha invalidos")
@@ -65,27 +67,65 @@ function AuthProvider({ children }: any) {
             })
     }
 
-    // async function getUser() {
-    //     await firebase
-    //         .database()
-    //         .ref("Listas")
-    //         .child(user)
-    //         .on("value", (snapshot) => {
-    //             setemail([])
+    const handleCategories = (category: string, destinedValue: number, id: string) => {
+        try {
+            if (category === '') return;
 
-    //             snapshot.forEach((childItem) => {
-    //                 const data = {
-    //                     key: childItem.key,
-    //                     lista: childItem.key,
-    //                 }
-    //                 setemail((old: never[]) => [...old, data])
-    //             })
-    //         })
-    // }
+            if (id !== undefined) {
+                firebase.database().ref('Categories').child(user).child(id).update({
+                    category: category,
+                    destinedValue: destinedValue
+                }).then(() => {
+                    notification.open({
+                        message: 'Sucesso',
+                        description: 'Categoria editada!',
+                        icon: <SmileOutlined style={{ color: "#00C897" }} />,
+                        onClick: () => {
+                            console.log('Notification Clicked!');
+                        },
+                    });
+                }).catch((error) => {
+                    console.log(error)
+                })
+            } else {
+
+                let categories = firebase.database().ref('Categories').child(user);
+                let key: any = categories.push().key;
+
+                categories.child(key).set({
+                    category,
+                    destinedValue
+                })
+                    .then(() => {
+                        notification.open({
+                            message: 'Sucesso',
+                            description: 'Categoria cadastrada!',
+                            icon: <SmileOutlined style={{ color: "#00C897" }} />,
+                            onClick: () => {
+                                console.log('Notification Clicked!');
+                            },
+                        });
+                    }).catch((error) => {
+                        console.log(error)
+                    })
+            }
+        } catch (error) {
+            notification.open({
+                message: 'Você foi deslogado',
+                description: 'Por favor refaça o login',
+                icon: <CloseCircleOutlined style={{ color: 'red' }} />,
+                onClick: () => {
+                    console.log('Notification Clicked!');
+                },
+            });
+            router.push("./LoginPage")
+        }
+
+    };
 
     return (
         <AuthContext.Provider
-            value={{ user, msg, login, signUp, logout, email, passwordReset }}>
+            value={{ user, msg, login, signUp, logout, email, passwordReset, handleCategories }}>
             {children}
         </AuthContext.Provider>
     )

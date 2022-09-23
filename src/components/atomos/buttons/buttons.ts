@@ -27,10 +27,10 @@ align-items: ${(props) => props.align || "center"};
 	}
 `
 export const SecondaryButton = styled.button.attrs(
-	(props: { color: string, size: number }) => props
+	(props: { color: string, size: number, margin: number }) => props
 )`
 font-size: ${(props) => props.size}rem;
-margin-top: 0.5rem;
+margin-top: ${(props) => props.margin}rem;
 color: ${(props) => props.color};
 :active {
 		transform: scale(0.9);

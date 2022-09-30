@@ -5,6 +5,7 @@ import { notification } from "antd"
 import { CloseCircleOutlined } from '@ant-design/icons';
 import { SmileOutlined } from '@ant-design/icons';
 
+
 export const AuthContext = createContext({})
 
 function AuthProvider({ children }: any) {
@@ -68,6 +69,7 @@ function AuthProvider({ children }: any) {
     }
 
     const handleCategories = (category: string, destinedValue: number, id: string) => {
+
         try {
             if (category === '') return;
 

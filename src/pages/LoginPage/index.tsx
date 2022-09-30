@@ -1,9 +1,10 @@
-import React, { useState, useContext } from "react"
+import React, { useState } from "react"
 import { Button, SecondaryButton } from '../../components/atomos/buttons'
 import { InputLogin } from '../../components/atomos/inputs'
 import { TitleLogin, SubtitleLogin, Message } from '../../components/atomos/typography'
 import { mdiCashCheck } from '@mdi/js';
-import { AuthContext } from "../../contexts/auth"
+import useAuth from '../../hooks/useAuth'
+
 import Icon from '@mdi/react'
 import {
     Container, ContainerLogin, Span,
@@ -17,7 +18,7 @@ const Login = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [recoverPassword, setRecoverPassword] = useState(false)
-    const { login, signUp, passwordReset, msg }: any = useContext(AuthContext)
+    const { login, signUp, passwordReset, msg }: any = useAuth()
 
     function access() {
         if (type === "login") {

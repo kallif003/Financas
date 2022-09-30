@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu, Modal, InputNumber } from "antd";
 import { Button, SecondaryButton } from "../../../atomos/buttons"
 import firebase from "../../../../connection/firebaseConnection"
@@ -6,9 +6,9 @@ import { useRouter } from "next/router"
 import { notification } from "antd"
 import { CloseCircleOutlined } from '@ant-design/icons';
 import { SmileOutlined } from '@ant-design/icons';
-import { AuthContext } from "../../../../contexts/auth";
 import { mdiLeadPencil } from '@mdi/js';
 import Icon from "@mdi/react";
+import useAuth from "../../../../hooks/useAuth";
 
 
 const { SubMenu } = Menu;
@@ -21,7 +21,7 @@ interface listSalary {
 const MenuInformations = () => {
     const [registrationModal, setRegistrationModal] = useState(false);
     const [editeModal, setEditeModal] = useState(false)
-    const { user }: any = useContext(AuthContext)
+    const { user }: any = useAuth()
     const [salary, setSalary] = useState(0)
     const [mySalary, setMySalary] = useState<listSalary[]>([])
     const [visible, setVisible] = useState(false)
@@ -86,7 +86,6 @@ const MenuInformations = () => {
     }
 
     useEffect(() => {
-
         const getSalary = async () => {
             console.log(user)
             if (user !== '') {

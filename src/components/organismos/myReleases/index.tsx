@@ -1,98 +1,124 @@
-import React from "react";
-import { Button } from "../../atomos/buttons";
-import { ContainerRelease, ContainerReleaseButton } from "./styles";
-import { getMonth } from 'date-fns'
+import React, { useEffect, useState } from "react";
+import firebase from '../../../connection/firebaseConnection'
+import { ContainerRelease } from "./styles";
+import { getMonth, getYear } from 'date-fns'
 import type { DatePickerProps } from 'antd';
 import { DatePicker, Cascader, Collapse } from "antd";
+import useAuth from "../../../hooks/useAuth";
 import moment from "moment";
 
+interface MonthOptions {
+    value: number
+    label: string
+}
+
+interface ListCategory {
+    key: number
+    category: string,
+    value: number
+}
 
 const { Panel } = Collapse;
 
-const listReleases = [
-    {
-        id: 1,
-        month: 'Janeiro',
-        year: 2022,
-        categoria: 'Farmacia',
-        compra: 'remedio coração',
-        descrição: '',
-        valor: 10.5,
-        data: new Date().getDate()
-    },
-
-]
-
-const listCategory = [
-    {
-        id: 1,
-        category: 'Farmacia',
-        valorDestinado: 200
-    }
-]
-
-const options = [
-    {
-        value: 0,
-        label: 'Janeiro'
-    }
-]
-
-
-const month = getMonth(new Date())
-const mesAtual = (month: any) => {
-    const mes: any = {
-        0: 'Janeiro',
-        1: "Fevereiro",
-        2: "Março",
-        3: "Abril",
-        4: "Maio",
-        5: "Junho",
-        6: "Julho",
-        7: "Agosto",
-        8: 'Setembro',
-        9: "Outubro",
-        10: "Novembro",
-        11: "Dezembro"
-    }
-    return mes[month]
-}
-
-let dataAtual = mesAtual(month)
-const cu = (value: any) => {
-    dataAtual = mesAtual(parseInt(value[0]))
-};
-
-
-const year = String(new Date().getFullYear())
-
-const onChange: DatePickerProps['onChange'] = async (date, dateString) => {
-    const dateee = await dateString.split(' ')
-    console.log(dateString);
-};
-
 const Releases = () => {
+    const [currentMonth, setCurrentMonth] = useState('');
+    const [month, setMonth] = useState(0);
+    const [year, setYear] = useState(String(getYear(new Date())))
+    const [categories, setCategories] = useState<ListCategory[]>([])
+    const { user }: any = useAuth()
+
+    const getCategories = async () => {
+        if (categories.length === 0) {
+            await firebase
+                .database()
+                .ref("Categories")
+                .child(user)
+                .on("value", (snapshot) => {
+                    setCategories([])
+
+                    snapshot.forEach((childItem) => {
+                        const data = {
+                            key: childItem.key,
+                            category: childItem.val().category,
+                            value: childItem.val().destinedValue,
+                        }
+                        setCategories((old: any[]) => [...old, data])
+                    })
+                })
+        }
+    }
+
+    const options: Array<MonthOptions> = [
+        { value: 0, label: 'Janeiro' },
+        { value: 1, label: 'Fevereiro' },
+        { value: 2, label: 'Março' },
+        { value: 3, label: 'Abril' },
+        { value: 4, label: 'Maio' },
+        { value: 5, label: 'Junho' },
+        { value: 6, label: 'Julho' },
+        { value: 7, label: 'Agosto' },
+        { value: 8, label: 'Setembro' },
+        { value: 9, label: 'Outubro' },
+        { value: 10, label: 'Novembro' },
+        { value: 11, label: 'Dezembro' },
+    ]
+
+    const currentDate = (option: any) => {
+        const month: any = {
+            0: 'Janeiro',
+            1: "Fevereiro",
+            2: "Março",
+            3: "Abril",
+            4: "Maio",
+            5: "Junho",
+            6: "Julho",
+            7: "Agosto",
+            8: 'Setembro',
+            9: "Outubro",
+            10: "Novembro",
+            11: "Dezembro"
+        }
+        return month[option]
+    }
+
+    useEffect(() => {
+        getCategories()
+        setMonth(getMonth(new Date()))
+        setCurrentMonth(currentDate(month))
+        console.log(year)
+    }, [])
+
+
+    const selectMonth = (value: any) => {
+        setCurrentMonth(currentDate(parseInt(value[0])))
+    };
+
+    const selectYear: DatePickerProps['onChange'] = async (item, dateString) => {
+        setYear(await dateString.split(' ')[0])
+    };
+
     return (
         <ContainerRelease>
-            <h1 className="ml-3 mt-3 pr-2">LANÇAMENTOS</h1>
+            <h1 className="ml-3 mt-0 pr-2">LANÇAMENTOS</h1>
             <div className="flex flex-row mb-5">
                 <p className="ml-3 mt-3">Selecione mês e ano:</p>
                 <Cascader
                     options={options}
                     bordered={false}
-                    onChange={cu}
-                    placeholder={dataAtual}
-                    style={{ marginTop: '0.5rem', }}
+                    onChange={selectMonth}
+                    placeholder={currentMonth}
+                    style={{ marginTop: '0.5rem' }}
                 />
                 <DatePicker
                     picker="year"
                     bordered={false}
                     defaultValue={moment(year, 'YYYY')}
-                    onChange={onChange}
+                    onChange={selectYear}
                 />
             </div>
             <Collapse
                 defaultActiveKey={['1']}
+
                 style={{
                     background: '#00C897',
                     width: '40%',
@@ -101,7 +127,7 @@ const Releases = () => {
             >
                 <div className="w-screen flex flex-col items-start pl-5 pt-8 leading-3 text-[#d4d4d4] ">
                     <h1 className="font-bold text-[50px] pb-1 text-[#fff]">
-                        {`${dataAtual}/${year}`}
+                        {`${currentMonth}/${year}`}
                     </h1>
                     <div className="flex">
                         <p className="pr-1">Total de dispesas:</p>
@@ -112,15 +138,14 @@ const Releases = () => {
                         <p>R$1.000</p>
                     </div>
                 </div>
-                <Panel header="Farmacia" key="1" >
-                    Farmacia
-                </Panel>
-                <Panel header="Diversão" key="2"  >
-                    Farmacia
-                </Panel>
-                <Panel header="Mercado" key="3"  >
-                    Farmacia
-                </Panel>
+                {categories.map((category) => (
+                    <Panel header={category.category} key={category.key} style={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                        <div >
+                            <h1 className="text-[#3a3a3a]">Total destinado: R$</h1>
+                            <h1 className="text-[#3a3a3a]">Sobrando: R$</h1>
+                        </div>
+                    </Panel>
+                ))}
             </Collapse>
 
 

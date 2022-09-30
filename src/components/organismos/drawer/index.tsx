@@ -7,13 +7,13 @@ import { Text } from "../../atomos/typography"
 import MenuComponent from "../../organismos/menu";
 import { SecondaryButton } from "../../atomos/buttons"
 import { Drawer, Divider, Input, InputNumber } from "antd";
-import { AuthContext } from "../../../contexts/auth";
+import { AuthContext } from "../../../contexts/AuthProvider";
 import { useRouter } from "next/router"
 
 
 const DrawerComponent = (props: any) => {
     const { logout }: any = useContext(AuthContext)
-    
+
     return (
         <Drawer
             title="Bem vindo ao SaveMoney"

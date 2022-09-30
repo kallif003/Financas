@@ -1,12 +1,12 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { Menu, Modal, Input, InputNumber, notification } from "antd";
 import { Button, SecondaryButton } from "../../../atomos/buttons"
 import { mdiLeadPencil } from '@mdi/js';
 import Icon from "@mdi/react";
 import { mdiDelete } from '@mdi/js';
-import { AuthContext } from "../../../../contexts/auth";
 import { SmileOutlined } from '@ant-design/icons';
 import firebase from "../../../../connection/firebaseConnection"
+import useAuth from "../../../../hooks/useAuth";
 
 const { SubMenu } = Menu;
 
@@ -20,8 +20,11 @@ const MenuCategories = () => {
     const [categories, setCategories] = useState<ListCategory[]>([])
     const [category, setCategory] = useState('')
     const [destinedValue, setDestinedValue] = useState(0)
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const { user, handleCategories }: any = useContext(AuthContext)
+    const [registrationModal, setRegistrationModal] = useState(false);
+    const [editeModal, setEditeModal] = useState(false)
+    const [id, setId] = useState('')
+    const { user, handleCategories }: any = useAuth()
+
 
     const getCategories = async () => {
         if (categories.length === 0) {
@@ -44,6 +47,10 @@ const MenuCategories = () => {
         }
     }
 
+
+
+
+
     const handleDelete = (key: any) => {
         firebase.database().ref('Categories')
             .child(user).child(key).remove()
@@ -61,18 +68,24 @@ const MenuCategories = () => {
             })
     }
 
-    const handleEdite = (key: any) => {
-        handleCategories(category, destinedValue, key)
+    const isModalOpen = (key: any) => {
+        setEditeModal(true)
+        setId(key)
+
+    }
+
+    const handleEdite = () => {
+        handleCategories(category, destinedValue, id)
         setCategory("")
         setDestinedValue(0)
-        setIsModalOpen(false)
+        setEditeModal(false)
     }
 
     const createCategories = () => {
         handleCategories(category, destinedValue);
         setCategory("")
         setDestinedValue(0)
-        setIsModalOpen(false)
+        setRegistrationModal(false)
     }
 
     return (
@@ -107,7 +120,7 @@ const MenuCategories = () => {
                             <div className="flex flex-row justify-between">
                                 <p>{c.category}</p>
                                 <p>{`R$${c.value}`}</p>
-                                <SecondaryButton margin={-1} onClick={() => setIsModalOpen(true)} >
+                                <SecondaryButton margin={-1} onClick={() => isModalOpen(c.key)} >
                                     <Icon
                                         path={mdiLeadPencil}
                                         size={1}
@@ -122,9 +135,9 @@ const MenuCategories = () => {
                             </div>
 
                             <Modal title="Editar Categorias"
-                                open={isModalOpen}
-                                onCancel={() => setIsModalOpen(false)}
-                                onOk={() => handleEdite(c.key)}
+                                open={editeModal}
+                                onCancel={() => setEditeModal(false)}
+                                onOk={() => handleEdite()}
                             >
                                 <div className="flex flex-row justify-between">
                                     <h1>Categoria</h1>
@@ -158,7 +171,7 @@ const MenuCategories = () => {
                         <Button
                             width={5}
                             height={1.5}
-                            onClick={() => setIsModalOpen(true)}
+                            onClick={() => setRegistrationModal(true)}
                             className="hover:text-[#FFD365]"
                         >
                             Cadastrar
@@ -167,9 +180,9 @@ const MenuCategories = () => {
                 </SubMenu>
                 <Modal
                     title="Cadastrar Categorias"
-                    open={isModalOpen}
+                    open={registrationModal}
                     onOk={createCategories}
-                    onCancel={() => setIsModalOpen(false)}>
+                    onCancel={() => setRegistrationModal(false)}>
                     <div className="flex flex-row justify-between">
                         <h1>Categoria</h1>
                         <Input

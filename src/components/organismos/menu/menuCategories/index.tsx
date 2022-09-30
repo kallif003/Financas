@@ -47,10 +47,6 @@ const MenuCategories = () => {
         }
     }
 
-
-
-
-
     const handleDelete = (key: any) => {
         firebase.database().ref('Categories')
             .child(user).child(key).remove()

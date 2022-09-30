@@ -10,8 +10,6 @@ import {
     Container, ContainerLogin, Span,
     WrapInput, ContainerTitle, ContainerButtons
 } from './styles'
-import { off } from "process";
-
 
 const Login = () => {
     const [type, setType] = useState("login")

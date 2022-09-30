@@ -87,7 +87,6 @@ const MenuInformations = () => {
 
     useEffect(() => {
         const getSalary = async () => {
-            console.log(user)
             if (user !== '') {
                 await firebase
                     .database()

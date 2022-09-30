@@ -1,4 +1,4 @@
-import { createContext, useState } from "react"
+import { createContext, useState, useEffect } from "react"
 import firebase from "../connection/firebaseConnection"
 import { useRouter } from "next/router"
 import { notification } from "antd"
@@ -13,6 +13,8 @@ function AuthProvider({ children }: any) {
     const [user, setUser] = useState("")
     const [email, setEmail] = useState({})
     const router = useRouter()
+
+
 
     async function signUp(email: string, password: string) {
         await firebase
@@ -69,7 +71,6 @@ function AuthProvider({ children }: any) {
     }
 
     const handleCategories = (category: string, destinedValue: number, id: string) => {
-
         try {
             if (category === '') return;
 

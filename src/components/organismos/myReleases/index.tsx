@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import firebase from '../../../connection/firebaseConnection'
-import { ContainerRelease } from "./styles";
+import { ButtonRelease } from "../../atomos/buttons";
 import { getMonth, getYear } from 'date-fns'
 import type { DatePickerProps } from 'antd';
-import { DatePicker, Cascader, Collapse, Spin } from "antd";
-import useAuth from "../../../hooks/useAuth";
+import { notification } from "antd"
+import { CloseCircleOutlined } from '@ant-design/icons';
+import { SmileOutlined } from '@ant-design/icons';
+import { DatePicker, Cascader, Collapse, Spin, Modal, Input, InputNumber, Popover, Divider } from "antd";
 import moment from "moment";
 import { useRouter } from "next/router"
 
@@ -19,13 +21,31 @@ interface ListCategory {
     value: number
 }
 
+interface ListRelease {
+    key: number
+    category: string
+    description: string
+    date: string
+    value: number
+    month: string
+    year: string
+
+}
+
 const { Panel } = Collapse;
 
 const Releases = () => {
     const [currentMonth, setCurrentMonth] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [description, setDescription] = useState("")
+    const [value, setValue] = useState(0)
+    const [user, setUser] = useState("")
     const [month, setMonth] = useState(0);
     const [year, setYear] = useState(String(getYear(new Date())))
     const [categories, setCategories] = useState<ListCategory[]>([])
+    const [category, setCategory] = useState("")
+    const [release, setRelease] = useState<ListRelease[]>([])
+    const [filterRelease, setFilterRelease] = useState<ListRelease[]>([])
     const [loading, setLoading] = useState(false);
     const router = useRouter()
 
@@ -66,7 +86,9 @@ const Releases = () => {
         setLoading(true)
         await firebase.auth().onAuthStateChanged((user) => {
             if (user) {
+                setUser(user.uid)
                 getCategories(user.uid)
+                getRelease(user.uid)
                 router.push("./Home")
             } else {
                 router.push("./LoginPage")
@@ -95,23 +117,87 @@ const Releases = () => {
         }
     }
 
+    const getRelease = async (uid: string) => {
+        if (release.length === 0) {
+            await firebase
+                .database()
+                .ref("Release")
+                .child(uid)
+                .on("value", (snapshot) => {
+                    setRelease([])
+                    snapshot.forEach((childItem) => {
+                        const data = {
+                            key: childItem.key,
+                            category: childItem.val().category,
+                            description: childItem.val().description,
+                            value: childItem.val().value,
+                            date: childItem.val().date,
+                            month: childItem.val().currentMonth,
+                            year: childItem.val().year
+                        }
+                        setRelease((old: any[]) => [...old, data])
+
+                    })
+                })
+        }
+
+    }
+
     useEffect(() => {
         AuthStateChanged()
         setMonth(getMonth(new Date()))
         setCurrentMonth(currentDate(month))
-    }, [])
+    }, [user])
 
 
     const selectMonth = (value: any) => {
         setCurrentMonth(currentDate(parseInt(value[0])))
+        getRelease(user)
     };
 
     const selectYear: DatePickerProps['onChange'] = async (item, dateString) => {
         setYear(await dateString.split(' ')[0])
+        getRelease(user)
     };
 
+    const addNewRelease = async () => {
+        const date = new Date().toLocaleString().split(" ")[0]
+
+        let release = await firebase.database().ref('Release').child(user);
+        let key: any = release.push().key;
+
+        release.child(key).set({
+            category,
+            description,
+            value,
+            currentMonth,
+            year,
+            date,
+        })
+            .then(() => {
+                notification.open({
+                    message: 'Sucesso',
+                    description: 'Lançamento efetuado!',
+                    icon: <SmileOutlined style={{ color: "#00C897" }} />,
+                    onClick: () => {
+                        console.log('Notification Clicked!');
+                    },
+                });
+            }).catch((error) => {
+                console.log(error)
+            })
+
+        setIsModalOpen(false)
+        getRelease(user)
+    }
+
+    const handleModal = (category: string) => {
+        setCategory(category)
+        setIsModalOpen(true)
+    }
+
     return (
-        <ContainerRelease>
+        <div className="pl-3 pt-5">
             <Spin spinning={loading}>
                 <h1 className="ml-3 mt-0 pr-2">LANÇAMENTOS</h1>
                 <div className="flex flex-row mb-5">
@@ -153,16 +239,69 @@ const Releases = () => {
                         </div>
                     </div>
                     {categories.map((category) => (
-                        <Panel header={category.category} key={category.key} style={{ fontWeight: 'bold', fontSize: '1rem' }}>
-                            <div >
-                                <h1 className="text-[#3a3a3a]">Total destinado: R$</h1>
-                                <h1 className="text-[#3a3a3a]">Sobrando: R$</h1>
+
+                        <Panel header={category.category} key={category.key} style={{ fontWeight: 'bold', fontSize: '1rem', color: "#fff" }}>
+                            <div className="mt-3 flex justify-between">
+                                <div >
+                                    <h1 className="text-[#3a3a3a]">Total destinado: R${category.value} </h1>
+                                    <h1 className="text-[#3a3a3a]">Total de gastos: R$</h1>
+                                    <h1 className="text-[#3a3a3a]">Sobrando: R$</h1>
+                                </div>
+                                <Popover title="Novo Lançamento">
+                                    <ButtonRelease
+                                        onClick={() => handleModal(category.category)}
+                                    >
+                                        +
+                                    </ButtonRelease>
+                                </Popover>
                             </div>
+                            <Divider style={{ borderColor: "#3a3a3a", }} />
+                            {release.map((r) => (
+
+                                r.month === currentMonth && r.year === year && (
+
+                                    r.category === category.category && (
+                                        <div className="mt-5" key={r.key}>
+                                            <h1>Descrição: {r.description}</h1>
+                                            <h1>Valor: R${r.value}</h1>
+                                            <h1>Data: {r.date}</h1>
+                                        </div>
+                                    )
+                                )
+
+                            ))}
+                            <Modal title="Novo lançamento"
+                                open={isModalOpen}
+                                onCancel={() => setIsModalOpen(false)}
+                                onOk={() => addNewRelease()}
+                            >
+                                <div className="flex flex-col justify-evenly">
+                                    <h1>Descrição</h1>
+                                    <Input
+                                        placeholder="Informe"
+                                        value={description}
+                                        onChange={(event) => setDescription(event.target.value)}
+                                        style={{ width: '28rem', marginBottom: "1rem" }}
+                                    />
+                                    <h1>Valor</h1>
+                                    <InputNumber
+                                        addonBefore="+"
+                                        addonAfter="$"
+                                        defaultValue={100}
+                                        value={value}
+                                        onChange={(value) => setValue(value)}
+                                        style={{ width: '8rem' }}
+                                    />
+                                </div>
+                            </Modal>
                         </Panel>
+
                     ))}
                 </Collapse>
+
+
             </Spin>
-        </ContainerRelease>
+        </div >
     )
 };
 

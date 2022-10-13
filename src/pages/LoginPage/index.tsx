@@ -9,7 +9,7 @@ import Icon from '@mdi/react'
 import {
     Container, ContainerLogin, Span,
     WrapInput, ContainerTitle, ContainerButtons
-} from './styles'
+} from '../../components/pagesStyles/styles'
 
 const Login = () => {
     const [type, setType] = useState("login")

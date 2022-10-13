@@ -36,3 +36,19 @@ color: ${(props) => props.color};
 		transform: scale(0.9);
 	}
 `
+
+export const ButtonRelease = styled.button`
+display: flex;
+justify-content: center;
+align-items: center;
+width: 3rem;
+height: 3rem;
+border-radius: 50rem;
+background: #019267;
+color: #fff;
+font-size: 2rem;
+
+:active {
+		transform: scale(0.9);
+	}
+`

@@ -6,7 +6,10 @@ import type { DatePickerProps } from 'antd';
 import { notification } from "antd"
 import { CloseCircleOutlined } from '@ant-design/icons';
 import { SmileOutlined } from '@ant-design/icons';
-import { DatePicker, Cascader, Collapse, Spin, Modal, Input, InputNumber, Popover, Divider } from "antd";
+import {
+    DatePicker, Cascader, Collapse, Spin,
+    Modal, Input, InputNumber, Popover, Divider, Menu
+} from "antd";
 import moment from "moment";
 import { useRouter } from "next/router"
 
@@ -29,10 +32,12 @@ interface ListRelease {
     value: number
     month: string
     year: string
+    total: number
 
 }
 
 const { Panel } = Collapse;
+const { SubMenu } = Menu;
 
 const Releases = () => {
     const [currentMonth, setCurrentMonth] = useState('');
@@ -46,6 +51,9 @@ const Releases = () => {
     const [category, setCategory] = useState("")
     const [release, setRelease] = useState<ListRelease[]>([])
     const [filterRelease, setFilterRelease] = useState<ListRelease[]>([])
+    const [totalExpenses, setTotalExpenses] = useState(0)
+    const [remaining, setRemaining] = useState(0)
+    const [totalDestined, setTotalDestined] = useState(0)
     const [loading, setLoading] = useState(false);
     const router = useRouter()
 
@@ -115,6 +123,7 @@ const Releases = () => {
                     })
                 })
         }
+
     }
 
     const getRelease = async (uid: string) => {
@@ -141,6 +150,47 @@ const Releases = () => {
                 })
         }
 
+
+    }
+
+    const addExpenses = (category: string) => {
+        let summation = 0
+        let subtracting = 0
+        let totalValue = 0
+
+        release.forEach((e) => {
+            if (e.month === currentMonth) {
+                const sum = release.reduce((total, value) => {
+                    if (value.category === category) {
+                        summation = total + value.value
+                    }
+
+                    return summation
+                }, 0)
+
+                setTotalExpenses(sum)
+
+                const leftovers = categories.reduce((total, value) => {
+                    if (value.category === category) {
+                        subtracting = value.value - summation
+                    }
+
+                    return subtracting
+                }, 0)
+
+                setRemaining(leftovers)
+
+                const total = categories.reduce((t, value) => {
+                    if (value.category === category) {
+                        totalValue = value.value
+                    }
+                    return totalValue
+                }, 0)
+
+                setTotalDestined(total)
+            }
+        })
+
     }
 
     useEffect(() => {
@@ -153,6 +203,14 @@ const Releases = () => {
     const selectMonth = (value: any) => {
         setCurrentMonth(currentDate(parseInt(value[0])))
         getRelease(user)
+        release.forEach((e) => {
+            if (e.month === currentMonth) {
+                setRemaining(0)
+                setTotalExpenses(0)
+                setTotalDestined(0)
+            }
+        })
+        addExpenses(category)
     };
 
     const selectYear: DatePickerProps['onChange'] = async (item, dateString) => {
@@ -187,6 +245,7 @@ const Releases = () => {
                 console.log(error)
             })
 
+
         setIsModalOpen(false)
         getRelease(user)
     }
@@ -197,8 +256,8 @@ const Releases = () => {
     }
 
     return (
-        <div className="pl-3 pt-5">
-            <Spin spinning={loading}>
+        <div className="pl-3 pt-5 pb-5">
+            <Spin spinning={false}>
                 <h1 className="ml-3 mt-0 pr-2">LANÇAMENTOS</h1>
                 <div className="flex flex-row mb-5">
                     <p className="ml-3 mt-3">Selecione mês e ano:</p>
@@ -216,13 +275,12 @@ const Releases = () => {
                         onChange={selectYear}
                     />
                 </div>
-                <Collapse
-                    defaultActiveKey={['1']}
-
+                <div
                     style={{
                         background: '#00C897',
+                        borderRadius: "1rem",
                         width: '40%',
-                        borderRadius: '1rem'
+                        marginBottom: '2rem'
                     }}
                 >
                     <div className="w-screen flex flex-col items-start pl-5 pt-8 leading-3 text-[#d4d4d4] ">
@@ -238,66 +296,94 @@ const Releases = () => {
                             <p>R$1.000</p>
                         </div>
                     </div>
-                    {categories.map((category) => (
-
-                        <Panel header={category.category} key={category.key} style={{ fontWeight: 'bold', fontSize: '1rem', color: "#fff" }}>
-                            <div className="mt-3 flex justify-between">
-                                <div >
-                                    <h1 className="text-[#3a3a3a]">Total destinado: R${category.value} </h1>
-                                    <h1 className="text-[#3a3a3a]">Total de gastos: R$</h1>
-                                    <h1 className="text-[#3a3a3a]">Sobrando: R$</h1>
-                                </div>
-                                <Popover title="Novo Lançamento">
-                                    <ButtonRelease
-                                        onClick={() => handleModal(category.category)}
-                                    >
-                                        +
-                                    </ButtonRelease>
-                                </Popover>
-                            </div>
-                            <Divider style={{ borderColor: "#3a3a3a", }} />
-                            {release.map((r) => (
-
-                                r.month === currentMonth && r.year === year && (
-
-                                    r.category === category.category && (
-                                        <div className="mt-5" key={r.key}>
-                                            <h1>Descrição: {r.description}</h1>
-                                            <h1>Valor: R${r.value}</h1>
-                                            <h1>Data: {r.date}</h1>
-                                        </div>
-                                    )
-                                )
-
-                            ))}
-                            <Modal title="Novo lançamento"
-                                open={isModalOpen}
-                                onCancel={() => setIsModalOpen(false)}
-                                onOk={() => addNewRelease()}
+                    <Menu
+                        mode="inline"
+                        style={
+                            {
+                                background: "#00C897",
+                                borderRadius: "1rem",
+                            }} theme="dark"
+                    >
+                        {categories.map((category) => (
+                            <SubMenu
+                                key={category.key}
+                                title={category.category}
+                                onTitleClick={() => addExpenses(category.category)}
+                                style={
+                                    {
+                                        fontWeight: 'bold',
+                                        marginBottom: '2rem',
+                                        color: '#fff'
+                                    }
+                                }
                             >
-                                <div className="flex flex-col justify-evenly">
-                                    <h1>Descrição</h1>
-                                    <Input
-                                        placeholder="Informe"
-                                        value={description}
-                                        onChange={(event) => setDescription(event.target.value)}
-                                        style={{ width: '28rem', marginBottom: "1rem" }}
-                                    />
-                                    <h1>Valor</h1>
-                                    <InputNumber
-                                        addonBefore="+"
-                                        addonAfter="$"
-                                        defaultValue={100}
-                                        value={value}
-                                        onChange={(value) => setValue(value)}
-                                        style={{ width: '8rem' }}
-                                    />
-                                </div>
-                            </Modal>
-                        </Panel>
+                                <Menu.Item
+                                    key={category.key}
+                                    style={
+                                        {
+                                            background: "#00C897",
+                                            paddingLeft: 0,
+                                            margin: 0,
+                                            height: '100%',
+                                            width: '100%',
+                                        }}>
+                                    <div className="mt-3 flex justify-between pl-5 text-lg leading-3 pb-3">
+                                        <div >
+                                            <h1 className="text-[#3a3a3a]">Total destinado: R${totalDestined} </h1>
+                                            <h1 className="text-[#3a3a3a]">Total de gastos: R${totalExpenses}</h1>
+                                            <h1 className="text-[#3a3a3a]">Sobrando: R${remaining}</h1>
+                                        </div>
+                                        <Popover title="Novo Lançamento">
+                                            <ButtonRelease
+                                                onClick={() => handleModal(category.category)}
+                                            >
+                                                +
+                                            </ButtonRelease>
+                                        </Popover>
+                                    </div>
+                                    {release.map((r) => (
+                                        r.month === currentMonth && r.year === year && (
+                                            r.category === category.category && (
+                                                <div className="mt-5 pb-5 pl-5 text-lg leading-3" key={r.key}>
+                                                    <h1>Descrição: <span className="text-[#fff] px-1 rounded-sm">{r.description}</span></h1>
+                                                    <h1>Valor: <span className="text-[#fff] px-1 rounded-sm">R${r.value}</span></h1>
+                                                    <h1>Data: <span className="text-[#fff] px-1 rounded-sm">{r.date}</span></h1>
+                                                </div>
 
-                    ))}
-                </Collapse>
+                                            )
+                                        )
+                                    ))}
+                                    <Modal title="Novo lançamento"
+                                        open={isModalOpen}
+                                        onCancel={() => setIsModalOpen(false)}
+                                        onOk={() => addNewRelease()}
+                                    >
+                                        <div className="flex flex-col justify-evenly">
+                                            <h1>Descrição</h1>
+                                            <Input
+                                                placeholder="Informe"
+                                                value={description}
+                                                onChange={(event) => setDescription(event.target.value)}
+                                                style={{ width: '28rem', marginBottom: "1rem" }}
+                                            />
+                                            <h1>Valor</h1>
+                                            <InputNumber
+                                                addonBefore="+"
+                                                addonAfter="$"
+                                                defaultValue={100}
+                                                value={value}
+                                                onChange={(value) => setValue(value)}
+                                                style={{ width: '8rem' }}
+                                            />
+                                        </div>
+                                    </Modal>
+                                    <Divider style={{ borderColor: "#000", marginLeft: "1.25rem" }} />
+                                </Menu.Item>
+
+                            </SubMenu>
+                        ))}
+                    </Menu>
+                </div>
 
 
             </Spin>

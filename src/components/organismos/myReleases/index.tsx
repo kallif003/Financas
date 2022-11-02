@@ -11,8 +11,13 @@ import {
     Modal, Input, InputNumber, Popover, Divider, Menu
 } from "antd";
 import moment from "moment";
+import Icon from '@mdi/react'
+import { mdiArrowDownBold } from '@mdi/js';
+import { mdiArrowUpBold } from '@mdi/js';
 import { useRouter } from "next/router"
-
+import { SubMenu } from './styles'
+import ca from "date-fns/locale/ca/index";
+import { SourceMap } from "module";
 interface MonthOptions {
     value: number
     label: string
@@ -33,24 +38,29 @@ interface ListRelease {
     month: string
     year: string
     total: number
+    id?: number
 
 }
 
-const { Panel } = Collapse;
-const { SubMenu } = Menu;
+
+let mes: string
+let ano: string
+let destinedValue: any = []
 
 const Releases = () => {
     const [currentMonth, setCurrentMonth] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isOpen, setIsOpen] = useState(-1)
     const [description, setDescription] = useState("")
     const [value, setValue] = useState(0)
     const [user, setUser] = useState("")
     const [month, setMonth] = useState(0);
+    const [salary, setSalary] = useState(0)
+    const [expenses, setExpenses] = useState(0)
     const [year, setYear] = useState(String(getYear(new Date())))
     const [categories, setCategories] = useState<ListCategory[]>([])
     const [category, setCategory] = useState("")
     const [release, setRelease] = useState<ListRelease[]>([])
-    const [filterRelease, setFilterRelease] = useState<ListRelease[]>([])
     const [totalExpenses, setTotalExpenses] = useState(0)
     const [remaining, setRemaining] = useState(0)
     const [totalDestined, setTotalDestined] = useState(0)
@@ -97,6 +107,7 @@ const Releases = () => {
                 setUser(user.uid)
                 getCategories(user.uid)
                 getRelease(user.uid)
+                getSalary(user.uid)
                 router.push("./Home")
             } else {
                 router.push("./LoginPage")
@@ -112,6 +123,7 @@ const Releases = () => {
                 .child(uid)
                 .on("value", (snapshot) => {
                     setCategories([])
+                    destinedValue = []
                     snapshot.forEach((childItem) => {
                         const data = {
                             key: childItem.key,
@@ -120,21 +132,33 @@ const Releases = () => {
                         }
                         setCategories((old: any[]) => [...old, data])
                         setLoading(false)
+                        destinedValue.push(data.value)
                     })
                 })
+
         }
 
     }
 
+    const soma = () => {
+        const sum = destinedValue.reduce((total: any, value: any) => {
+            let summation = total + value
+
+            return summation
+        }, 0)
+
+        setExpenses(sum)
+    }
+
     const getRelease = async (uid: string) => {
-        if (release.length === 0) {
-            await firebase
-                .database()
-                .ref("Release")
-                .child(uid)
-                .on("value", (snapshot) => {
-                    setRelease([])
-                    snapshot.forEach((childItem) => {
+        await firebase
+            .database()
+            .ref("Release")
+            .child(uid)
+            .on("value", (snapshot) => {
+                setRelease([])
+                snapshot.forEach((childItem) => {
+                    if (childItem.val().currentMonth === mes && childItem.val().year === ano) {
                         const data = {
                             key: childItem.key,
                             category: childItem.val().category,
@@ -145,12 +169,21 @@ const Releases = () => {
                             year: childItem.val().year
                         }
                         setRelease((old: any[]) => [...old, data])
-
-                    })
+                    }
                 })
-        }
+            })
+    }
 
-
+    const getSalary = async (uid: string) => {
+        await firebase
+            .database()
+            .ref("Salary")
+            .child(uid)
+            .on("value", (snapshot) => {
+                snapshot.forEach((childItem) => {
+                    setSalary(childItem.val().salary)
+                })
+            })
     }
 
     const addExpenses = (category: string) => {
@@ -158,64 +191,62 @@ const Releases = () => {
         let subtracting = 0
         let totalValue = 0
 
-        release.forEach((e) => {
-            if (e.month === currentMonth) {
-                const sum = release.reduce((total, value) => {
-                    if (value.category === category) {
-                        summation = total + value.value
-                    }
-
-                    return summation
-                }, 0)
-
-                setTotalExpenses(sum)
-
-                const leftovers = categories.reduce((total, value) => {
-                    if (value.category === category) {
-                        subtracting = value.value - summation
-                    }
-
-                    return subtracting
-                }, 0)
-
-                setRemaining(leftovers)
-
-                const total = categories.reduce((t, value) => {
-                    if (value.category === category) {
-                        totalValue = value.value
-                    }
-                    return totalValue
-                }, 0)
-
-                setTotalDestined(total)
+        const sum = release.reduce((total, value) => {
+            if (value.category === category) {
+                summation = total + value.value
             }
-        })
+
+            return summation
+        }, 0)
+
+        setTotalExpenses(sum)
+
+        const leftovers = categories.reduce((total, value) => {
+            if (value.category === category) {
+                subtracting = value.value - summation
+            }
+
+            return subtracting
+        }, 0)
+
+        setRemaining(leftovers)
+
+        const total = categories.reduce((t, value) => {
+            if (value.category === category) {
+                totalValue = value.value
+            }
+            return totalValue
+        }, 0)
+
+        setTotalDestined(total)
 
     }
+
+    useEffect(() => {
+        soma()
+    }, [loading])
 
     useEffect(() => {
         AuthStateChanged()
         setMonth(getMonth(new Date()))
         setCurrentMonth(currentDate(month))
+        mes = currentDate(month)
+
     }, [user])
 
 
     const selectMonth = (value: any) => {
+        mes = currentDate(parseInt(value[0]))
         setCurrentMonth(currentDate(parseInt(value[0])))
         getRelease(user)
-        release.forEach((e) => {
-            if (e.month === currentMonth) {
-                setRemaining(0)
-                setTotalExpenses(0)
-                setTotalDestined(0)
-            }
-        })
         addExpenses(category)
     };
 
     const selectYear: DatePickerProps['onChange'] = async (item, dateString) => {
+        ano = await dateString.split(' ')[0]
         setYear(await dateString.split(' ')[0])
         getRelease(user)
+        addExpenses(category)
     };
 
     const addNewRelease = async () => {
@@ -247,7 +278,10 @@ const Releases = () => {
 
 
         setIsModalOpen(false)
+        setDescription("")
+        setValue(0)
         getRelease(user)
+        setIsOpen(-1)
     }
 
     const handleModal = (category: string) => {
@@ -256,44 +290,44 @@ const Releases = () => {
     }
 
     return (
-        <div className="pl-3 pt-5 pb-5">
-            <Spin spinning={false}>
+        <div className="px-3 pt-5 pb-5">
+            <Spin spinning={loading}>
                 <h1 className="ml-3 mt-0 pr-2">LANÇAMENTOS</h1>
-                <div className="flex flex-row mb-5">
+                <div className="flex flex-row mb-5 sm:flex-col">
                     <p className="ml-3 mt-3">Selecione mês e ano:</p>
                     <Cascader
                         options={options}
                         bordered={false}
                         onChange={selectMonth}
+                        onClick={() => setIsOpen(-1)}
                         placeholder={currentMonth}
-                        style={{ marginTop: '0.5rem' }}
+                        style={{ marginTop: '0.5rem', width: '8rem' }}
                     />
                     <DatePicker
                         picker="year"
                         bordered={false}
                         defaultValue={moment(year, 'YYYY')}
                         onChange={selectYear}
+                        onClick={() => setIsOpen(-1)}
+                        className="sm:w-[8rem] w-24"
                     />
                 </div>
-                <div
-                    style={{
-                        background: '#00C897',
-                        borderRadius: "1rem",
-                        width: '40%',
-                        marginBottom: '2rem'
-                    }}
-                >
-                    <div className="w-screen flex flex-col items-start pl-5 pt-8 leading-3 text-[#d4d4d4] ">
-                        <h1 className="font-bold text-[50px] pb-1 text-[#fff]">
+                <div className="w-auto sm:mx-2 xl:w-[40%] bg-[#00C897] rounded-[1rem] mb-[2rem]">
+                    <div className="w-screen flex flex-col items-start pl-5 pt-8 leading-3 text-[#d4d4d4] sm:w-auto">
+                        <h1 className="font-bold text-[50px] pb-1 text-[#fff] sm:text-[25px]">
                             {`${currentMonth}/${year}`}
                         </h1>
                         <div className="flex">
-                            <p className="pr-1">Total de dispesas:</p>
-                            <p>R$2.000</p>
+                            <p className="pr-1">Sálario:</p>
+                            <p>R${salary}</p>
                         </div>
                         <div className="flex">
-                            <p className="pr-1">Sobrando:</p>
-                            <p>R$1.000</p>
+                            <p className="pr-1">Total de dispesas:</p>
+                            <p>R${expenses}</p>
+                        </div>
+                        <div className="flex">
+                            <p className="pr-1">{expenses > salary ? "Negativo" : "Sobrando"}:</p>
+                            <p>R${salary - expenses}</p>
                         </div>
                     </div>
                     <Menu
@@ -304,21 +338,37 @@ const Releases = () => {
                                 borderRadius: "1rem",
                             }} theme="dark"
                     >
-                        {categories.map((category) => (
-                            <SubMenu
-                                key={category.key}
-                                title={category.category}
-                                onTitleClick={() => addExpenses(category.category)}
-                                style={
-                                    {
-                                        fontWeight: 'bold',
-                                        marginBottom: '2rem',
-                                        color: '#fff'
-                                    }
-                                }
-                            >
+                        {categories.map((category, index) => (
+                            <SubMenu key={category.key}>
+                                <div className="flex justify-between items-center mt-5">
+                                    <h1 className="text-white ml-5 text-xl mt-1">{category.category}</h1>
+                                    <div className="flex">
+                                        <button id={String(index)}
+                                            onClick={() => { setIsOpen(index); addExpenses(category.category) }}
+                                            className={isOpen !== index ? "block mr-7" : "hidden"}
+                                        >
+                                            <Icon path={mdiArrowUpBold}
+                                                size={1}
+                                                color="#fff"
+
+                                            />
+                                        </button>
+                                        <button
+                                            onClick={() => setIsOpen(-1)}
+                                            className={isOpen == index ? "block mr-7" : "hidden"}
+                                        >
+                                            <Icon path={mdiArrowDownBold}
+                                                size={1}
+                                                color="#fff"
+
+                                            />
+                                        </button>
+                                    </div>
+                                </div>
+
+
                                 <Menu.Item
-                                    key={category.key}
+                                    className={isOpen === index ? "block" : "hidden"}
                                     style={
                                         {
                                             background: "#00C897",
@@ -329,9 +379,14 @@ const Releases = () => {
                                         }}>
                                     <div className="mt-3 flex justify-between pl-5 text-lg leading-3 pb-3">
                                         <div >
-                                            <h1 className="text-[#3a3a3a]">Total destinado: R${totalDestined} </h1>
-                                            <h1 className="text-[#3a3a3a]">Total de gastos: R${totalExpenses}</h1>
-                                            <h1 className="text-[#3a3a3a]">Sobrando: R${remaining}</h1>
+                                            <h1 className="text-[#3a3a3a]">Total destinado: <span className="text-[#2a2a2a]">R${totalDestined}</span></h1>
+                                            <h1 className="text-[#3a3a3a]">Total de gastos: <span className="text-[#2a2a2a]">R${totalExpenses}</span></h1>
+                                            <h1 className="text-[#3a3a3a]">
+                                                {totalExpenses > totalDestined ?
+                                                    "Negativo" : "Sobrando"}:
+                                                <span className="text-[#2a2a2a]"> R${remaining}
+                                                </span>
+                                            </h1>
                                         </div>
                                         <Popover title="Novo Lançamento">
                                             <ButtonRelease
@@ -386,7 +441,7 @@ const Releases = () => {
                 </div>
 
 
-            </Spin>
+            </Spin >
         </div >
     )
 };

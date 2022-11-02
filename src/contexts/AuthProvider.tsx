@@ -26,7 +26,7 @@ function AuthProvider({ children }: any) {
 
     }
 
-    async function login(email: string, password: string) {
+    async function login(email: string, password: string, setLoading: any) {
         await firebase
             .auth()
             .signInWithEmailAndPassword(email, password)
@@ -34,9 +34,11 @@ function AuthProvider({ children }: any) {
                 router.push("./Home")
                 setUser(value.user.uid)
                 setEmail(value.user.email)
+                setLoading(false)
             })
             .catch((error) => {
                 setMsg("Email ou senha invalidos")
+                setLoading(false)
                 setTimeout(() => {
                     setMsg("")
                 }, 20000)

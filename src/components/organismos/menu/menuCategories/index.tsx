@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Menu, Modal, Input, InputNumber, notification } from "antd";
 import { Button, SecondaryButton } from "../../../atomos/buttons"
 import { mdiLeadPencil } from '@mdi/js';
@@ -7,6 +7,7 @@ import { mdiDelete } from '@mdi/js';
 import { SmileOutlined } from '@ant-design/icons';
 import firebase from "../../../../connection/firebaseConnection"
 import useAuth from "../../../../hooks/useAuth";
+import { useRouter } from "next/router"
 
 const { SubMenu } = Menu;
 
@@ -22,16 +23,30 @@ const MenuCategories = () => {
     const [destinedValue, setDestinedValue] = useState(0)
     const [registrationModal, setRegistrationModal] = useState(false);
     const [editeModal, setEditeModal] = useState(false)
+    const [user, setUser] = useState("")
+    const [loading, setLoading] = useState(false);
     const [id, setId] = useState('')
-    const { user, handleCategories }: any = useAuth()
+    const { handleCategories }: any = useAuth()
+    const router = useRouter()
 
-
-    const getCategories = async () => {
+    const AuthStateChanged = async () => {
+        setLoading(true)
+        await firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                setUser(user.uid)
+                getCategories(user.uid)
+            } else {
+                router.push("./LoginPage")
+            }
+        })
+    }
+    
+    const getCategories = async (uid: string) => {
         if (categories.length === 0) {
             await firebase
                 .database()
                 .ref("Categories")
-                .child(user)
+                .child(uid)
                 .on("value", (snapshot) => {
                     setCategories([])
 
@@ -84,6 +99,10 @@ const MenuCategories = () => {
         setRegistrationModal(false)
     }
 
+    useEffect(() => {
+        AuthStateChanged()
+    }, [user])
+
     return (
         <div>
             <Menu
@@ -96,7 +115,7 @@ const MenuCategories = () => {
                 <SubMenu
                     key={1}
                     title="Categorias"
-                    onTitleClick={getCategories}
+                    onTitleClick={() => getCategories(user)}
                     style={
                         {
                             fontWeight: 'bold',

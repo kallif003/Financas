@@ -85,31 +85,38 @@ const MenuInformations = () => {
         if (mySalary.length > 0) setVisible(true)
     }
 
-    useEffect(() => {
-        const getSalary = async () => {
-            if (user !== '') {
-                await firebase
-                    .database()
-                    .ref("Salary")
-                    .child(user)
-                    .on("value", (snapshot) => {
-                        setMySalary([])
-
-                        snapshot.forEach((childItem) => {
-                            const data = {
-                                key: childItem.key,
-                                salary: childItem.val().salary,
-                            }
-                            setMySalary((old: any[]) => [...old, data])
-                        })
-                    })
+    const AuthStateChanged = async () => {
+        await firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                getSalary(user.uid)
+            } else {
+                router.push("./LoginPage")
             }
+        })
+    }
 
-        }
+    const getSalary = async (uid: string) => {
+        await firebase
+            .database()
+            .ref("Salary")
+            .child(uid)
+            .on("value", (snapshot) => {
+                setMySalary([])
 
-        getSalary()
+                snapshot.forEach((childItem) => {
+                    const data = {
+                        key: childItem.key,
+                        salary: childItem.val().salary,
+                    }
+                    setMySalary((old: any[]) => [...old, data])
+                })
+            })
 
 
+    }
+
+    useEffect(() => {
+        AuthStateChanged()
     }, [user])
 
     return (

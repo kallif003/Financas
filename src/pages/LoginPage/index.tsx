@@ -3,6 +3,7 @@ import { Button, SecondaryButton } from '../../components/atomos/buttons'
 import { InputLogin } from '../../components/atomos/inputs'
 import { TitleLogin, SubtitleLogin, Message } from '../../components/atomos/typography'
 import { mdiCashCheck } from '@mdi/js';
+import { Spin } from "antd";
 import useAuth from '../../hooks/useAuth'
 
 import Icon from '@mdi/react'
@@ -16,11 +17,13 @@ const Login = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [recoverPassword, setRecoverPassword] = useState(false)
+    const [loading, setLoading] = useState(false);
     const { login, signUp, passwordReset, msg }: any = useAuth()
 
     function access() {
         if (type === "login") {
-            login(email, password)
+            setLoading(true)
+            login(email, password, setLoading)
         } else {
             signUp(email, password)
             setEmail("")
@@ -35,6 +38,7 @@ const Login = () => {
     return (
         <Container>
             <ContainerLogin>
+                <Spin spinning={loading}></Spin>
                 <ContainerTitle>
                     <TitleLogin>SaveMoney</TitleLogin>
                     <Icon path={mdiCashCheck}

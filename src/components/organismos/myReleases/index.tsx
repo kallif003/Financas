@@ -159,6 +159,7 @@ const Releases = () => {
                 setRelease([])
                 snapshot.forEach((childItem) => {
                     if (childItem.val().currentMonth === mes) {
+                        console.log(mes)
                         const data = {
                             key: childItem.key,
                             category: childItem.val().category,

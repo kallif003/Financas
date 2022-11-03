@@ -293,7 +293,7 @@ const Releases = () => {
 
     return (
         <div className="px-3 pt-5 pb-5">
-            {categories.length > 0 ? (
+            {categories?.length > 0 ? (
                 <Spin spinning={false}>
                     <h1 className="ml-3 mt-0 pr-2">LANÇAMENTOS</h1>
                     <div className="flex flex-row mb-5 sm:flex-col">
@@ -368,8 +368,6 @@ const Releases = () => {
                                             </button>
                                         </div>
                                     </div>
-
-
                                     <Menu.Item
                                         style={isOpen === index ?
                                             {
@@ -425,9 +423,9 @@ const Releases = () => {
                                                     placeholder="Informe"
                                                     value={description}
                                                     onChange={(event) => setDescription(event.target.value)}
-                                                    style={{ width: '28rem', marginBottom: "1rem" }}
+                                                    className="w-[28rem] sm:w-60"
                                                 />
-                                                <h1>Valor</h1>
+                                                <h1 className="mt-5">Valor</h1>
                                                 <InputNumber
                                                     addonBefore="+"
                                                     addonAfter="$"

@@ -371,15 +371,15 @@ const Releases = () => {
 
 
                                     <Menu.Item
-                                        className={isOpen === index ? "block" : "hidden"}
-                                        style={
+                                        style={isOpen === index ?
                                             {
                                                 background: "#00C897",
                                                 paddingLeft: 0,
                                                 margin: 0,
                                                 height: '100%',
                                                 width: '100%',
-                                            }}>
+                                                display: "block"
+                                            } : { display: "none" }}>
 
                                         <div className="mt-3 flex justify-between pl-5 text-lg leading-3 pb-3">
                                             <div >

@@ -3,11 +3,12 @@ import { Button, SecondaryButton } from '../../components/atomos/buttons'
 import { InputLogin } from '../../components/atomos/inputs'
 import { TitleLogin, SubtitleLogin, Message } from '../../components/atomos/typography'
 import { mdiCashCheck } from '@mdi/js';
+import Icon from '@mdi/react'
 import { Spin } from "antd";
 import Head from "next/head";
 import useAuth from '../../hooks/useAuth'
 
-import Icon from '@mdi/react'
+
 import {
     Container, ContainerLogin, Span,
     WrapInput, ContainerTitle, ContainerButtons
@@ -26,7 +27,8 @@ const Login = () => {
             setLoading(true)
             login(email, password, setLoading)
         } else {
-            signUp(email, password)
+            setLoading(true)
+            signUp(email, password, setLoading)
             setEmail("")
             setPassword("")
         }
@@ -38,12 +40,13 @@ const Login = () => {
     }
     return (
         <Container>
+
             <Head>
                 <title>SaveMoney</title>
                 <link rel="icon" href="/dolars.ico" />
             </Head>
             <ContainerLogin>
-                <Spin spinning={loading}></Spin>
+
                 <ContainerTitle>
                     <TitleLogin>SaveMoney</TitleLogin>
                     <Icon path={mdiCashCheck}
@@ -77,20 +80,25 @@ const Login = () => {
                 </WrapInput>
                 <Message className={msg === "" ? "hidden" : "block"}>{msg}</Message>
                 <ContainerButtons>
+
                     <Button onClick={access}
                         width={10}
                         height={2}
                         background={"#FFD365"}
                         style={recoverPassword === false ? { display: "block" } : { display: "none" }}
                     >
-                        {type === 'login' ? "Entrar" : "Cadastrar"}
+                        <Spin spinning={loading}>
+                            {type === 'login' ? "Entrar" : "Cadastrar"}
+                        </Spin>
                     </Button>
                     <Button onClick={recover}
                         width={10}
                         height={2}
                         background={"#FFD365"}
                         style={recoverPassword === true ? { display: "block" } : { display: "none" }}>
-                        Recuperar
+                        <Spin spinning={loading}>
+                            Recuperar
+                        </Spin>
                     </Button>
                     <SecondaryButton color={'#fff'} size={0.8}
                         onClick={() => setType((type) =>
@@ -102,10 +110,12 @@ const Login = () => {
                         onClick={() => setRecoverPassword(!recoverPassword)}>
                         {recoverPassword === false ? "Esqueceu a senha?" : "Faça o login"}
                     </SecondaryButton>
+
                 </ContainerButtons>
 
             </ContainerLogin>
-        </Container>
+
+        </Container >
 
     )
 }

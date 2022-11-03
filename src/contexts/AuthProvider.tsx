@@ -12,11 +12,12 @@ function AuthProvider({ children }: any) {
 
 
 
-    async function signUp(email: string, password: string) {
+    async function signUp(email: string, password: string, setLoading: any) {
         await firebase
             .auth()
             .createUserWithEmailAndPassword(email, password)
             .then(() => {
+                setLoading(false)
                 router.push("./Home")
             })
 
@@ -68,7 +69,7 @@ function AuthProvider({ children }: any) {
             })
     }
 
-    
+
 
     return (
         <AuthContext.Provider

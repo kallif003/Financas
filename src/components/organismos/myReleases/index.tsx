@@ -47,6 +47,7 @@ interface ListRelease {
 let mes: string
 let ano: string
 let destinedValue: any = []
+let status: any
 
 const Releases = () => {
     const [currentMonth, setCurrentMonth] = useState('');
@@ -125,22 +126,25 @@ const Releases = () => {
                 .on("value", (snapshot) => {
                     setCategories([])
                     destinedValue = []
+                    let data: any
                     snapshot.forEach((childItem) => {
-                        const data = {
+                        data = {
                             key: childItem.key,
                             category: childItem.val().category,
                             value: childItem.val().destinedValue,
                         }
                         setCategories((old: any[]) => [...old, data])
-
                         setLoading(false)
                         destinedValue.push(data.value)
                     })
-                    console.log(loading)
+
+                    if(data === undefined) {
+                        status = false
+                    }else {
+                        status = true
+                    }
                 })
-
         }
-
     }
 
     const soma = () => {
@@ -294,7 +298,7 @@ const Releases = () => {
 
     return (
         <div className="px-3 pt-5 pb-5">
-            {categories.length > 0 ? (
+            {status === true && (
                 <Spin spinning={false}>
                     <h1 className="ml-3 mt-0 pr-2">LANÇAMENTOS</h1>
                     <div className="flex flex-row mb-5 sm:flex-col">
@@ -317,7 +321,7 @@ const Releases = () => {
                         />
                     </div>
                     <div className="w-auto sm:mx-2 xl:w-[40%] bg-[#00C897] rounded-[1rem] mb-[2rem]">
-                        <div className="w-screen flex flex-col items-start pl-5 pt-8 leading-3 text-[#d4d4d4] sm:w-auto">
+                        <div className="w-auto flex flex-col items-start pl-5 pt-8 leading-3 text-[#d4d4d4] sm:w-auto">
                             <h1 className="font-bold text-[50px] pb-1 text-[#fff] sm:text-[25px]">
                                 {`${currentMonth}/${year}`}
                             </h1>
@@ -451,15 +455,14 @@ const Releases = () => {
 
 
                 </Spin >
-            ) : (
+            )}
+            {status === false && (
                 <div className="flex flex-col items-center ">
-
                     <div className="w-56 opacity-25">
                         <Image src={sad} alt="sad" />
                     </div>
                     <h1>Não há categorias cadastradas, vá ao menu e cadastre!</h1>
                     <h2>Aproveite e cadastre o sálario também </h2>
-
                 </div>
             )}
         </div >

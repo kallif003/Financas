@@ -4,6 +4,7 @@ import { InputLogin } from '../../components/atomos/inputs'
 import { TitleLogin, SubtitleLogin, Message } from '../../components/atomos/typography'
 import { mdiCashCheck } from '@mdi/js';
 import { Spin } from "antd";
+import Head from "next/head";
 import useAuth from '../../hooks/useAuth'
 
 import Icon from '@mdi/react'
@@ -37,6 +38,10 @@ const Login = () => {
     }
     return (
         <Container>
+            <Head>
+                <title>SaveMoney</title>
+                <link rel="icon" href="/dolars.ico" />
+            </Head>
             <ContainerLogin>
                 <Spin spinning={loading}></Spin>
                 <ContainerTitle>

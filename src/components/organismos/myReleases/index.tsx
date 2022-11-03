@@ -18,6 +18,7 @@ import { useRouter } from "next/router"
 import { SubMenu } from './styles'
 import Image from "next/image"
 import sad from "../../../../public/sad.png"
+
 interface MonthOptions {
     value: number
     label: string
@@ -425,9 +426,9 @@ const Releases = () => {
                                                     placeholder="Informe"
                                                     value={description}
                                                     onChange={(event) => setDescription(event.target.value)}
-                                                    style={{ width: '28rem', marginBottom: "1rem" }}
+                                                    className="w-[28rem] sm:w-60"
                                                 />
-                                                <h1>Valor</h1>
+                                                <h1 className="mt-5">Valor</h1>
                                                 <InputNumber
                                                     addonBefore="+"
                                                     addonAfter="$"

@@ -251,15 +251,16 @@ const MenuCategories = () => {
                     open={registrationModal}
                     onOk={createCategories}
                     onCancel={() => setRegistrationModal(false)}>
-                    <div className="flex flex-row justify-between">
+                    <div className="flex flex-col justify-between">
                         <h1>Categoria</h1>
                         <Input
                             placeholder="Informe"
                             value={category}
                             onChange={(event) => setCategory(event.target.value)}
-                            style={{ width: '8rem' }}
+                            className="w-[28rem] sm:w-60"
+
                         />
-                        <h1>Valor destinado</h1>
+                        <h1 className="mt-5">Valor destinado</h1>
                         <InputNumber
                             addonBefore="+"
                             addonAfter="$"

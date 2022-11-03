@@ -1,4 +1,4 @@
-import { createContext, useState } from "react"
+import { createContext, useState, useEffect } from "react"
 import firebase from "../connection/firebaseConnection"
 import { useRouter } from "next/router"
 
@@ -10,17 +10,19 @@ function AuthProvider({ children }: any) {
     const [email, setEmail] = useState({})
     const router = useRouter()
 
+
+
     async function signUp(email: string, password: string) {
         await firebase
             .auth()
             .createUserWithEmailAndPassword(email, password)
-            .then((user) => {
+            .then(() => {
                 router.push("./Home")
             })
 
     }
 
-    async function login(email: string, password: string) {
+    async function login(email: string, password: string, setLoading: any) {
         await firebase
             .auth()
             .signInWithEmailAndPassword(email, password)
@@ -28,10 +30,11 @@ function AuthProvider({ children }: any) {
                 router.push("./Home")
                 setUser(value.user.uid)
                 setEmail(value.user.email)
-                console.log("🚀 ~ file: auth.tsx ~ line 31 ~ .then ~ value.user.email", value.user.email)
+                setLoading(false)
             })
             .catch((error) => {
                 setMsg("Email ou senha invalidos")
+                setLoading(false)
                 setTimeout(() => {
                     setMsg("")
                 }, 20000)
@@ -65,23 +68,7 @@ function AuthProvider({ children }: any) {
             })
     }
 
-    // async function getUser() {
-    //     await firebase
-    //         .database()
-    //         .ref("Listas")
-    //         .child(user)
-    //         .on("value", (snapshot) => {
-    //             setemail([])
-
-    //             snapshot.forEach((childItem) => {
-    //                 const data = {
-    //                     key: childItem.key,
-    //                     lista: childItem.key,
-    //                 }
-    //                 setemail((old: never[]) => [...old, data])
-    //             })
-    //         })
-    // }
+    
 
     return (
         <AuthContext.Provider

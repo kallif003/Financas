@@ -1,7 +1,7 @@
 import '../../styles/globals.css'
 import 'antd/dist/antd.css';
 import type { AppProps } from 'next/app'
-import AuthProvider from "../contexts/auth"
+import AuthProvider from "../contexts/AuthProvider"
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (

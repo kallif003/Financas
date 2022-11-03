@@ -126,9 +126,9 @@ const Releases = () => {
                 .on("value", (snapshot) => {
                     setCategories([])
                     destinedValue = []
-                    let data: any
+                    let setStatus: any
                     snapshot.forEach((childItem) => {
-                        data = {
+                        const data = {
                             key: childItem.key,
                             category: childItem.val().category,
                             value: childItem.val().destinedValue,
@@ -136,17 +136,18 @@ const Releases = () => {
                         setCategories((old: any[]) => [...old, data])
                         setLoading(false)
                         destinedValue.push(data.value)
+                        setStatus = data
                     })
 
-                    if(data === undefined) {
+                    if (setStatus === undefined) {
                         status = false
-                    }else {
+                    } else {
                         status = true
                     }
                 })
         }
     }
-
+ 
     const soma = () => {
         const sum = destinedValue.reduce((total: any, value: any) => {
             let summation = total + value

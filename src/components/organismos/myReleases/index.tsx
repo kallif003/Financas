@@ -16,8 +16,8 @@ import { mdiArrowDownBold } from '@mdi/js';
 import { mdiArrowUpBold } from '@mdi/js';
 import { useRouter } from "next/router"
 import { SubMenu } from './styles'
-import ca from "date-fns/locale/ca/index";
-import { SourceMap } from "module";
+import Image from "next/image"
+import sad from "../../../../public/sad.png"
 interface MonthOptions {
     value: number
     label: string
@@ -131,9 +131,11 @@ const Releases = () => {
                             value: childItem.val().destinedValue,
                         }
                         setCategories((old: any[]) => [...old, data])
+
                         setLoading(false)
                         destinedValue.push(data.value)
                     })
+                    console.log(loading)
                 })
 
         }
@@ -291,157 +293,174 @@ const Releases = () => {
 
     return (
         <div className="px-3 pt-5 pb-5">
-            <Spin spinning={loading}>
-                <h1 className="ml-3 mt-0 pr-2">LANÇAMENTOS</h1>
-                <div className="flex flex-row mb-5 sm:flex-col">
-                    <p className="ml-3 mt-3">Selecione mês e ano:</p>
-                    <Cascader
-                        options={options}
-                        bordered={false}
-                        onChange={selectMonth}
-                        onClick={() => setIsOpen(-1)}
-                        placeholder={currentMonth}
-                        style={{ marginTop: '0.5rem', width: '8rem' }}
-                    />
-                    <DatePicker
-                        picker="year"
-                        bordered={false}
-                        defaultValue={moment(year, 'YYYY')}
-                        onChange={selectYear}
-                        onClick={() => setIsOpen(-1)}
-                        className="sm:w-[8rem] w-24"
-                    />
-                </div>
-                <div className="w-auto sm:mx-2 xl:w-[40%] bg-[#00C897] rounded-[1rem] mb-[2rem]">
-                    <div className="w-screen flex flex-col items-start pl-5 pt-8 leading-3 text-[#d4d4d4] sm:w-auto">
-                        <h1 className="font-bold text-[50px] pb-1 text-[#fff] sm:text-[25px]">
-                            {`${currentMonth}/${year}`}
-                        </h1>
-                        <div className="flex">
-                            <p className="pr-1">Sálario:</p>
-                            <p>R${salary}</p>
-                        </div>
-                        <div className="flex">
-                            <p className="pr-1">Total de dispesas:</p>
-                            <p>R${expenses}</p>
-                        </div>
-                        <div className="flex">
-                            <p className="pr-1">{expenses > salary ? "Negativo" : "Sobrando"}:</p>
-                            <p>R${salary - expenses}</p>
-                        </div>
+            {categories.length > 0 ? (
+                <Spin spinning={false}>
+                    <h1 className="ml-3 mt-0 pr-2">LANÇAMENTOS</h1>
+                    <div className="flex flex-row mb-5 sm:flex-col">
+                        <p className="ml-3 mt-3">Selecione mês e ano:</p>
+                        <Cascader
+                            options={options}
+                            bordered={false}
+                            onChange={selectMonth}
+                            onClick={() => setIsOpen(-1)}
+                            placeholder={currentMonth}
+                            style={{ marginTop: '0.5rem', width: '8rem' }}
+                        />
+                        <DatePicker
+                            picker="year"
+                            bordered={false}
+                            defaultValue={moment(year, 'YYYY')}
+                            onChange={selectYear}
+                            onClick={() => setIsOpen(-1)}
+                            className="sm:w-[8rem] w-24"
+                        />
                     </div>
-                    <Menu
-                        mode="inline"
-                        style={
-                            {
-                                background: "#00C897",
-                                borderRadius: "1rem",
-                            }} theme="dark"
-                    >
-                        {categories.map((category, index) => (
-                            <SubMenu key={category.key}>
-                                <div className="flex justify-between items-center mt-5">
-                                    <h1 className="text-white ml-5 text-xl mt-1">{category.category}</h1>
-                                    <div className="flex">
-                                        <button id={String(index)}
-                                            onClick={() => { setIsOpen(index); addExpenses(category.category) }}
-                                            className={isOpen !== index ? "block mr-7" : "hidden"}
-                                        >
-                                            <Icon path={mdiArrowUpBold}
-                                                size={1}
-                                                color="#fff"
-
-                                            />
-                                        </button>
-                                        <button
-                                            onClick={() => setIsOpen(-1)}
-                                            className={isOpen == index ? "block mr-7" : "hidden"}
-                                        >
-                                            <Icon path={mdiArrowDownBold}
-                                                size={1}
-                                                color="#fff"
-
-                                            />
-                                        </button>
-                                    </div>
-                                </div>
-
-
-                                <Menu.Item
-                                    className={isOpen === index ? "block" : "hidden"}
-                                    style={
-                                        {
-                                            background: "#00C897",
-                                            paddingLeft: 0,
-                                            margin: 0,
-                                            height: '100%',
-                                            width: '100%',
-                                        }}>
-                                    <div className="mt-3 flex justify-between pl-5 text-lg leading-3 pb-3">
-                                        <div >
-                                            <h1 className="text-[#3a3a3a]">Total destinado: <span className="text-[#2a2a2a]">R${totalDestined}</span></h1>
-                                            <h1 className="text-[#3a3a3a]">Total de gastos: <span className="text-[#2a2a2a]">R${totalExpenses}</span></h1>
-                                            <h1 className="text-[#3a3a3a]">
-                                                {totalExpenses > totalDestined ?
-                                                    "Negativo" : "Sobrando"}:
-                                                <span className="text-[#2a2a2a]"> R${remaining}
-                                                </span>
-                                            </h1>
-                                        </div>
-                                        <Popover title="Novo Lançamento">
-                                            <ButtonRelease
-                                                onClick={() => handleModal(category.category)}
+                    <div className="w-auto sm:mx-2 xl:w-[40%] bg-[#00C897] rounded-[1rem] mb-[2rem]">
+                        <div className="w-screen flex flex-col items-start pl-5 pt-8 leading-3 text-[#d4d4d4] sm:w-auto">
+                            <h1 className="font-bold text-[50px] pb-1 text-[#fff] sm:text-[25px]">
+                                {`${currentMonth}/${year}`}
+                            </h1>
+                            <div className="flex">
+                                <p className="pr-1">Sálario:</p>
+                                <p>R${salary}</p>
+                            </div>
+                            <div className="flex">
+                                <p className="pr-1">Total de dispesas:</p>
+                                <p>R${expenses}</p>
+                            </div>
+                            <div className="flex">
+                                <p className="pr-1">{expenses > salary ? "Negativo" : "Sobrando"}:</p>
+                                <p>R${salary - expenses}</p>
+                            </div>
+                        </div>
+                        <Menu
+                            mode="inline"
+                            style={
+                                {
+                                    background: "#00C897",
+                                    borderRadius: "1rem",
+                                }} theme="dark"
+                        >
+                            {categories.map((category, index) => (
+                                <SubMenu key={category.key}>
+                                    <div className="flex justify-between items-center mt-5">
+                                        <h1 className="text-white ml-5 text-xl mt-1">{category.category}</h1>
+                                        <div className="flex">
+                                            <button id={String(index)}
+                                                onClick={() => { setIsOpen(index); addExpenses(category.category) }}
+                                                style={isOpen !== index ? { display: "block", marginRight: "1.75rem" } : { display: "none" }}
                                             >
-                                                +
-                                            </ButtonRelease>
-                                        </Popover>
-                                    </div>
-                                    {release.map((r) => (
-                                        r.month === currentMonth && r.year === year && (
-                                            r.category === category.category && (
-                                                <div className="mt-5 pb-5 pl-5 text-lg leading-3" key={r.key}>
-                                                    <h1>Descrição: <span className="text-[#fff] px-1 rounded-sm">{r.description}</span></h1>
-                                                    <h1>Valor: <span className="text-[#fff] px-1 rounded-sm">R${r.value}</span></h1>
-                                                    <h1>Data: <span className="text-[#fff] px-1 rounded-sm">{r.date}</span></h1>
-                                                </div>
+                                                <Icon path={mdiArrowUpBold}
+                                                    size={1}
+                                                    color="#fff"
 
-                                            )
-                                        )
-                                    ))}
-                                    <Modal title="Novo lançamento"
-                                        open={isModalOpen}
-                                        onCancel={() => setIsModalOpen(false)}
-                                        onOk={() => addNewRelease()}
-                                    >
-                                        <div className="flex flex-col justify-evenly">
-                                            <h1>Descrição</h1>
-                                            <Input
-                                                placeholder="Informe"
-                                                value={description}
-                                                onChange={(event) => setDescription(event.target.value)}
-                                                style={{ width: '28rem', marginBottom: "1rem" }}
-                                            />
-                                            <h1>Valor</h1>
-                                            <InputNumber
-                                                addonBefore="+"
-                                                addonAfter="$"
-                                                defaultValue={100}
-                                                value={value}
-                                                onChange={(value) => setValue(value)}
-                                                style={{ width: '8rem' }}
-                                            />
+                                                />
+                                            </button>
+                                            <button
+                                                onClick={() => setIsOpen(-1)}
+                                                style={isOpen === index ? { display: "block", marginRight: "1.75rem" } : { display: "none" }}
+                                            >
+                                                <Icon path={mdiArrowDownBold}
+                                                    size={1}
+                                                    color="#fff"
+
+                                                />
+                                            </button>
                                         </div>
-                                    </Modal>
-                                    <Divider style={{ borderColor: "#000", marginLeft: "1.25rem" }} />
-                                </Menu.Item>
+                                    </div>
 
-                            </SubMenu>
-                        ))}
-                    </Menu>
+
+                                    <Menu.Item
+                                        className={isOpen === index ? "block" : "hidden"}
+                                        style={
+                                            {
+                                                background: "#00C897",
+                                                paddingLeft: 0,
+                                                margin: 0,
+                                                height: '100%',
+                                                width: '100%',
+                                            }}>
+
+                                        <div className="mt-3 flex justify-between pl-5 text-lg leading-3 pb-3">
+                                            <div >
+                                                <h1 className="text-[#3a3a3a]">Total destinado: <span className="text-[#2a2a2a]">R${totalDestined}</span></h1>
+                                                <h1 className="text-[#3a3a3a]">Total de gastos: <span className="text-[#2a2a2a]">R${totalExpenses}</span></h1>
+                                                <h1 className="text-[#3a3a3a]">
+                                                    {totalExpenses > totalDestined ?
+                                                        "Negativo" : "Sobrando"}:
+                                                    <span className="text-[#2a2a2a]"> R${remaining}
+                                                    </span>
+                                                </h1>
+                                            </div>
+                                            <Popover title="Novo Lançamento">
+                                                <ButtonRelease
+                                                    onClick={() => handleModal(category.category)}
+                                                >
+                                                    +
+                                                </ButtonRelease>
+                                            </Popover>
+                                        </div>
+                                        {release.map((r) => (
+                                            r.month === currentMonth && r.year === year && (
+                                                r.category === category.category && (
+                                                    <div className="mt-5 pb-5 pl-5 text-lg leading-3" key={r.key}>
+                                                        <h1>Descrição: <span className="text-[#fff] px-1 rounded-sm">{r.description}</span></h1>
+                                                        <h1>Valor: <span className="text-[#fff] px-1 rounded-sm">R${r.value}</span></h1>
+                                                        <h1>Data: <span className="text-[#fff] px-1 rounded-sm">{r.date}</span></h1>
+                                                    </div>
+
+                                                )
+                                            )
+                                        ))}
+
+
+                                        <Modal title="Novo lançamento"
+                                            open={isModalOpen}
+                                            onCancel={() => setIsModalOpen(false)}
+                                            onOk={() => addNewRelease()}
+                                        >
+                                            <div className="flex flex-col justify-evenly">
+                                                <h1>Descrição</h1>
+                                                <Input
+                                                    placeholder="Informe"
+                                                    value={description}
+                                                    onChange={(event) => setDescription(event.target.value)}
+                                                    style={{ width: '28rem', marginBottom: "1rem" }}
+                                                />
+                                                <h1>Valor</h1>
+                                                <InputNumber
+                                                    addonBefore="+"
+                                                    addonAfter="$"
+                                                    defaultValue={100}
+                                                    value={value}
+                                                    onChange={(value) => setValue(value)}
+                                                    style={{ width: '8rem' }}
+                                                />
+                                            </div>
+                                        </Modal>
+                                        <Divider style={{ borderColor: "#000", marginLeft: "1.25rem" }} />
+
+                                    </Menu.Item>
+
+                                </SubMenu>
+                            ))}
+                        </Menu>
+
+                    </div>
+
+
+                </Spin >
+            ) : (
+                <div className="flex flex-col items-center ">
+
+                    <div className="w-56 opacity-25">
+                        <Image src={sad} alt="sad" />
+                    </div>
+                    <h1>Não há categorias cadastradas, vá ao menu e cadastre!</h1>
+                    <h2>Aproveite e cadastre o sálario também </h2>
+
                 </div>
-
-
-            </Spin >
+            )}
         </div >
     )
 };

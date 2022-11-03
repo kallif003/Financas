@@ -38,7 +38,7 @@ const DrawerComponent = (props: any) => {
                 />
                 <DivText>
                     <Text color="#FFD365" size={1}>Olá,</Text>
-                    <Text color="#fff" size={1} className="ml-1">kallif</Text>
+                    <Text color="#fff" size={1} className="ml-1">seja bem vindo(a)</Text>
                 </DivText>
                 <Divider style={{ borderColor: "#fff", marginTop: "-0.5rem" }} />
             </DivIconUser>

@@ -81,14 +81,15 @@ const Login = () => {
                         width={10}
                         height={2}
                         background={"#FFD365"}
-                        className={recoverPassword === false ? "block" : "hidden"}>
+                        style={recoverPassword === false ? { display: "block" } : { display: "none" }}
+                    >
                         {type === 'login' ? "Entrar" : "Cadastrar"}
                     </Button>
                     <Button onClick={recover}
                         width={10}
                         height={2}
                         background={"#FFD365"}
-                        className={recoverPassword === true ? "block" : "hidden"}>
+                        style={recoverPassword === true ? { display: "block" } : { display: "none" }}>
                         Recuperar
                     </Button>
                     <SecondaryButton color={'#fff'} size={0.8}

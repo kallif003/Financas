@@ -7,6 +7,7 @@ export const Button = styled.button.attrs(
 		background: string,
 		justify: string,
 		align: string
+		display: boolean
 	}) => props
 )`
 display: flex;
@@ -21,6 +22,7 @@ font-weight: bold;
 margin-bottom: 0.5rem;
 justify-content: ${(props) => props.justify || "center"};
 align-items: ${(props) => props.align || "center"};
+display: ${({ display }) => display ? "block" : "none"};
 
 :active {
 		transform: scale(0.9);

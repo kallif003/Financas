@@ -4,10 +4,10 @@ import { Button, SecondaryButton } from "../../../atomos/buttons"
 import { mdiLeadPencil } from '@mdi/js';
 import Icon from "@mdi/react";
 import { mdiDelete } from '@mdi/js';
-import { SmileOutlined } from '@ant-design/icons';
 import firebase from "../../../../connection/firebaseConnection"
-import useAuth from "../../../../hooks/useAuth";
 import { useRouter } from "next/router"
+import { CloseCircleOutlined } from '@ant-design/icons';
+import { SmileOutlined } from '@ant-design/icons';
 
 const { SubMenu } = Menu;
 
@@ -24,13 +24,10 @@ const MenuCategories = () => {
     const [registrationModal, setRegistrationModal] = useState(false);
     const [editeModal, setEditeModal] = useState(false)
     const [user, setUser] = useState("")
-    const [loading, setLoading] = useState(false);
     const [id, setId] = useState('')
-    const { handleCategories }: any = useAuth()
     const router = useRouter()
 
     const AuthStateChanged = async () => {
-        setLoading(true)
         await firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 setUser(user.uid)
@@ -40,7 +37,7 @@ const MenuCategories = () => {
             }
         })
     }
-    
+
     const getCategories = async (uid: string) => {
         if (categories.length === 0) {
             await firebase
@@ -91,6 +88,62 @@ const MenuCategories = () => {
         setDestinedValue(0)
         setEditeModal(false)
     }
+
+    const handleCategories = (category: string, destinedValue: number, id?: string) => {
+        try {
+            if (category === '') return;
+
+            if (id !== undefined) {
+                firebase.database().ref('Categories').child(user).child(id).update({
+                    category: category,
+                    destinedValue: destinedValue
+                }).then(() => {
+                    notification.open({
+                        message: 'Sucesso',
+                        description: 'Categoria editada!',
+                        icon: <SmileOutlined style={{ color: "#00C897" }} />,
+                        onClick: () => {
+                            console.log('Notification Clicked!');
+                        },
+                    });
+                }).catch((error) => {
+                    console.log(error)
+                })
+            } else {
+
+                let categories = firebase.database().ref('Categories').child(user);
+                let key: any = categories.push().key;
+
+                categories.child(key).set({
+                    category,
+                    destinedValue
+                })
+                    .then(() => {
+                        notification.open({
+                            message: 'Sucesso',
+                            description: 'Categoria cadastrada!',
+                            icon: <SmileOutlined style={{ color: "#00C897" }} />,
+                            onClick: () => {
+                                console.log('Notification Clicked!');
+                            },
+                        });
+                    }).catch((error) => {
+                        console.log(error)
+                    })
+            }
+        } catch (error) {
+            notification.open({
+                message: 'Você foi deslogado',
+                description: 'Por favor refaça o login',
+                icon: <CloseCircleOutlined style={{ color: 'red' }} />,
+                onClick: () => {
+                    console.log('Notification Clicked!');
+                },
+            });
+            router.push("./LoginPage")
+        }
+
+    };
 
     const createCategories = () => {
         handleCategories(category, destinedValue);

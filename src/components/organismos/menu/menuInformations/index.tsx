@@ -21,12 +21,22 @@ interface listSalary {
 const MenuInformations = () => {
     const [registrationModal, setRegistrationModal] = useState(false);
     const [editeModal, setEditeModal] = useState(false)
-    const { user }: any = useAuth()
     const [salary, setSalary] = useState(0)
     const [mySalary, setMySalary] = useState<listSalary[]>([])
     const [visible, setVisible] = useState(false)
+    const [user, setUser] = useState("")
     const router = useRouter()
 
+    const AuthStateChanged = async () => {
+        await firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                getSalary(user.uid)
+                setUser(user.uid)
+            } else {
+                router.push("./LoginPage")
+            }
+        })
+    }
 
     const showRegistrationModal = () => {
         setRegistrationModal(true);
@@ -83,16 +93,6 @@ const MenuInformations = () => {
     const setDisabledButton = () => {
         console.log(mySalary)
         if (mySalary.length > 0) setVisible(true)
-    }
-
-    const AuthStateChanged = async () => {
-        await firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                getSalary(user.uid)
-            } else {
-                router.push("./LoginPage")
-            }
-        })
     }
 
     const getSalary = async (uid: string) => {
@@ -177,7 +177,7 @@ const MenuInformations = () => {
 
                         </Menu.Item>
                     ))}
-                    <div className={mySalary.length > 0 ? "block" : "hidden"}>
+                    <div className={mySalary.length === 0 ? "block" : "hidden"}>
                         <Menu.Item
                             style={
                                 {

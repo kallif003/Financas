@@ -23,6 +23,7 @@ const MenuCategories = () => {
     const [destinedValue, setDestinedValue] = useState(0)
     const [registrationModal, setRegistrationModal] = useState(false);
     const [editeModal, setEditeModal] = useState(false)
+    const [error, setError] = useState("")
     const [user, setUser] = useState("")
     const [id, setId] = useState('')
     const router = useRouter()
@@ -146,10 +147,14 @@ const MenuCategories = () => {
     };
 
     const createCategories = () => {
-        handleCategories(category, destinedValue);
-        setCategory("")
-        setDestinedValue(0)
-        setRegistrationModal(false)
+        if (category !== "" && destinedValue !== 0) {
+            handleCategories(category, destinedValue);
+            setCategory("")
+            setDestinedValue(0)
+            setRegistrationModal(false)
+        } else {
+            setError("Os campos categoria e valor estão vazios")
+        }
     }
 
     useEffect(() => {
@@ -188,7 +193,13 @@ const MenuCategories = () => {
                             <div className="flex flex-row justify-between">
                                 <p>{c.category}</p>
                                 <p>{`R$${c.value}`}</p>
-                                <SecondaryButton margin={-1} onClick={() => isModalOpen(c.key)} >
+                                <SecondaryButton margin={-1}
+                                    onClick={() => {
+                                        isModalOpen(c.key);
+                                        setCategory(c.category);
+                                        setDestinedValue(c.value)
+                                    }}
+                                >
                                     <Icon
                                         path={mdiLeadPencil}
                                         size={1}
@@ -207,22 +218,22 @@ const MenuCategories = () => {
                                 onCancel={() => setEditeModal(false)}
                                 onOk={() => handleEdite()}
                             >
-                                <div className="flex flex-row justify-between">
+                                <div className="">
                                     <h1>Categoria</h1>
                                     <Input
                                         placeholder="Informe"
                                         value={category}
                                         onChange={(event) => setCategory(event.target.value)}
-                                        style={{ width: '8rem' }}
+                                        className="w-[8rem]"
                                     />
-                                    <h1>Valor destinado</h1>
+                                    <h1 className="mt-5">Valor destinado</h1>
                                     <InputNumber
                                         addonBefore="+"
                                         addonAfter="$"
                                         defaultValue={100}
                                         value={destinedValue}
                                         onChange={(value) => setDestinedValue(value)}
-                                        style={{ width: '8rem' }}
+                                        className="w-[10rem]"
                                     />
                                 </div>
                             </Modal>
@@ -250,13 +261,14 @@ const MenuCategories = () => {
                     title="Cadastrar Categorias"
                     open={registrationModal}
                     onOk={createCategories}
-                    onCancel={() => setRegistrationModal(false)}>
+                    onCancel={() => { setRegistrationModal(false); setError("") }}>
                     <div className="flex flex-col justify-between">
+                        <h1 className="text-red-600">{error}</h1>
                         <h1>Categoria</h1>
                         <Input
                             placeholder="Informe"
                             value={category}
-                            onChange={(event) => setCategory(event.target.value)}
+                            onChange={(event) => { setCategory(event.target.value); setError("") }}
                             className="w-[28rem] sm:w-60"
 
                         />
@@ -266,7 +278,7 @@ const MenuCategories = () => {
                             addonAfter="$"
                             defaultValue={100}
                             value={destinedValue}
-                            onChange={(value) => setDestinedValue(value)}
+                            onChange={(value) => { setDestinedValue(value); setError("") }}
                             style={{ width: '8rem' }}
                         />
                     </div>

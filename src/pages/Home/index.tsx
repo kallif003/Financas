@@ -17,7 +17,7 @@ const Home = () => {
                 <Releases />
             </div>
 
-            <div className="flex justify-center items-center mb-2">
+            <div className="flex justify-center items-center mb-5">
                 <Icon path={mdiCashCheck}
                     title="User Profile"
                     size={2}

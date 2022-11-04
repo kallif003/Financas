@@ -12,8 +12,8 @@ import {
 } from "antd";
 import moment from "moment";
 import Icon from '@mdi/react'
-import { mdiArrowDownBold } from '@mdi/js';
-import { mdiArrowUpBold } from '@mdi/js';
+import { mdiChevronDown } from '@mdi/js';
+import { mdiChevronUp } from '@mdi/js';
 import { useRouter } from "next/router"
 import { SubMenu } from './styles'
 import Image from "next/image"
@@ -67,6 +67,7 @@ const Releases = () => {
     const [remaining, setRemaining] = useState(0)
     const [totalDestined, setTotalDestined] = useState(0)
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("")
     const router = useRouter()
 
     const options: Array<MonthOptions> = [
@@ -147,7 +148,7 @@ const Releases = () => {
                 })
         }
     }
- 
+
     const soma = () => {
         const sum = destinedValue.reduce((total: any, value: any) => {
             let summation = total + value
@@ -258,38 +259,42 @@ const Releases = () => {
     };
 
     const addNewRelease = async () => {
-        const date = new Date().toLocaleString().split(" ")[0]
+        if (description !== "" && value !== 0) {
+            const date = new Date().toLocaleString().split(" ")[0]
 
-        let release = await firebase.database().ref('Release').child(user);
-        let key: any = release.push().key;
+            let release = await firebase.database().ref('Release').child(user);
+            let key: any = release.push().key;
 
-        release.child(key).set({
-            category,
-            description,
-            value,
-            currentMonth,
-            year,
-            date,
-        })
-            .then(() => {
-                notification.open({
-                    message: 'Sucesso',
-                    description: 'Lançamento efetuado!',
-                    icon: <SmileOutlined style={{ color: "#00C897" }} />,
-                    onClick: () => {
-                        console.log('Notification Clicked!');
-                    },
-                });
-            }).catch((error) => {
-                console.log(error)
+            release.child(key).set({
+                category,
+                description,
+                value,
+                currentMonth,
+                year,
+                date,
             })
+                .then(() => {
+                    notification.open({
+                        message: 'Sucesso',
+                        description: 'Lançamento efetuado!',
+                        icon: <SmileOutlined style={{ color: "#00C897" }} />,
+                        onClick: () => {
+                            console.log('Notification Clicked!');
+                        },
+                    });
+                }).catch((error) => {
+                    console.log(error)
+                })
 
 
-        setIsModalOpen(false)
-        setDescription("")
-        setValue(0)
-        getRelease(user)
-        setIsOpen(-1)
+            setIsModalOpen(false)
+            setDescription("")
+            setValue(0)
+            getRelease(user)
+            setIsOpen(-1)
+        } else {
+            setError("Os campos descrição e valor estão vazios")
+        }
     }
 
     const handleModal = (category: string) => {
@@ -356,7 +361,7 @@ const Releases = () => {
                                                 onClick={() => { setIsOpen(index); addExpenses(category.category) }}
                                                 style={isOpen !== index ? { display: "block", marginRight: "1.75rem" } : { display: "none" }}
                                             >
-                                                <Icon path={mdiArrowUpBold}
+                                                <Icon path={mdiChevronUp}
                                                     size={1}
                                                     color="#fff"
 
@@ -366,7 +371,7 @@ const Releases = () => {
                                                 onClick={() => setIsOpen(-1)}
                                                 style={isOpen === index ? { display: "block", marginRight: "1.75rem" } : { display: "none" }}
                                             >
-                                                <Icon path={mdiArrowDownBold}
+                                                <Icon path={mdiChevronDown}
                                                     size={1}
                                                     color="#fff"
 
@@ -422,15 +427,16 @@ const Releases = () => {
 
                                         <Modal title="Novo lançamento"
                                             open={isModalOpen}
-                                            onCancel={() => setIsModalOpen(false)}
+                                            onCancel={() => { setIsModalOpen(false); setError("") }}
                                             onOk={() => addNewRelease()}
                                         >
                                             <div className="flex flex-col justify-evenly">
+                                                <h1 className="text-red-600">{error}</h1>
                                                 <h1>Descrição</h1>
                                                 <Input
                                                     placeholder="Informe"
                                                     value={description}
-                                                    onChange={(event) => setDescription(event.target.value)}
+                                                    onChange={(event) => {setDescription(event.target.value); setError("")}}
                                                     className="w-[28rem] sm:w-60"
                                                 />
                                                 <h1 className="mt-5">Valor</h1>
@@ -439,12 +445,12 @@ const Releases = () => {
                                                     addonAfter="$"
                                                     defaultValue={100}
                                                     value={value}
-                                                    onChange={(value) => setValue(value)}
-                                                    style={{ width: '8rem' }}
+                                                    onChange={(value) => {setValue(value); setError("")}}
+                                                    className="w-[10rem] sm:w-[8rem]"
                                                 />
                                             </div>
                                         </Modal>
-                                        <Divider style={{ borderColor: "#000", marginLeft: "1.25rem" }} />
+                                        <Divider style={{ borderColor: "#000", marginLeft: '0.5rem' }} />
 
                                     </Menu.Item>
 
@@ -456,16 +462,19 @@ const Releases = () => {
 
 
                 </Spin >
-            )}
-            {status === false && (
-                <div className="flex flex-col items-center ">
-                    <div className="w-56 opacity-25">
-                        <Image src={sad} alt="sad" />
+            )
+            }
+            {
+                status === false && (
+                    <div className="flex flex-col items-center ">
+                        <div className="w-56 opacity-25">
+                            <Image src={sad} alt="sad" />
+                        </div>
+                        <h1>Não há categorias cadastradas, vá ao menu e cadastre!</h1>
+                        <h2>Aproveite e cadastre o sálario também </h2>
                     </div>
-                    <h1>Não há categorias cadastradas, vá ao menu e cadastre!</h1>
-                    <h2>Aproveite e cadastre o sálario também </h2>
-                </div>
-            )}
+                )
+            }
         </div >
     )
 };

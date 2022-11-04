@@ -215,7 +215,7 @@ const MenuCategories = () => {
 
                             <Modal title="Editar Categorias"
                                 open={editeModal}
-                                onCancel={() => setEditeModal(false)}
+                                onCancel={() => { setEditeModal(false); setCategory(""); setDestinedValue(0) }}
                                 onOk={() => handleEdite()}
                             >
                                 <div className="">

@@ -45,7 +45,7 @@ interface ListRelease {
 	category: string
 	description: string
 	date: string
-	value: number
+	value: string
 	month: string
 	year: string
 	total: number
@@ -62,6 +62,7 @@ const Releases = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false)
 	const [isOpen, setIsOpen] = useState(-1)
 	const [description, setDescription] = useState("")
+	const [stringValue, setStringValue] = useState("")
 	const [value, setValue] = useState(0)
 	const [user, setUser] = useState("")
 	const [month, setMonth] = useState(0)
@@ -129,39 +130,38 @@ const Releases = () => {
 	}
 
 	const getCategories = async (uid: string) => {
-		if (categories.length === 0) {
-			await firebase
-				.database()
-				.ref("Categories")
-				.child(uid)
-				.on("value", (snapshot) => {
-					setCategories([])
-					destinedValue = []
-					let setStatus: any
-					snapshot.forEach((childItem) => {
-						const data = {
-							key: childItem.key,
-							category: childItem.val().category,
-							value: childItem.val().destinedValue,
-						}
-						setCategories((old: any[]) => [...old, data])
-						setLoading(false)
-						destinedValue.push(data.value)
-						setStatus = data
-					})
-
-					if (setStatus === undefined) {
-						status = false
-					} else {
-						status = true
+		await firebase
+			.database()
+			.ref("Categories")
+			.child(uid)
+			.on("value", (snapshot) => {
+				setCategories([])
+				destinedValue = []
+				let setStatus: any
+				snapshot.forEach((childItem) => {
+					const data = {
+						key: childItem.key,
+						category: childItem.val().category,
+						value: childItem.val().destinedValue,
 					}
+					setCategories((old: any[]) => [...old, data])
+					setLoading(false)
+					destinedValue.push(data.value)
+					setStatus = data
 				})
-		}
+
+				if (setStatus === undefined) {
+					status = false
+				} else {
+					status = true
+				}
+			})
+		soma()
 	}
 
 	const soma = () => {
 		const sum = destinedValue.reduce((total: any, value: any) => {
-			let summation = total + value
+			let summation = total + parseFloat(value)
 
 			return summation
 		}, 0)
@@ -215,7 +215,7 @@ const Releases = () => {
 
 		const sum = release.reduce((total, value) => {
 			if (value.category === category) {
-				summation = total + value.value
+				summation = total + parseFloat(value.value)
 			}
 
 			return summation
@@ -245,7 +245,7 @@ const Releases = () => {
 
 	useEffect(() => {
 		soma()
-	}, [loading])
+	}, [destinedValue])
 
 	useEffect(() => {
 		AuthStateChanged()
@@ -270,7 +270,7 @@ const Releases = () => {
 	}
 
 	const addNewRelease = async () => {
-		if (description !== "" && value !== 0) {
+		if (description !== "" && stringValue !== "") {
 			const date = new Date().toLocaleString().split(" ")[0]
 
 			let release = await firebase.database().ref("Release").child(user)
@@ -281,7 +281,7 @@ const Releases = () => {
 				.set({
 					category,
 					description,
-					value,
+					value: parseFloat(stringValue.replace(",", ".")).toFixed(2),
 					currentMonth,
 					year,
 					date,
@@ -302,7 +302,7 @@ const Releases = () => {
 
 			setIsModalOpen(false)
 			setDescription("")
-			setValue(0)
+			setStringValue("")
 			getRelease(user)
 			setIsOpen(-1)
 		} else {
@@ -316,7 +316,7 @@ const Releases = () => {
 	}
 
 	const editRelease = () => {
-		if (description !== "" && value !== 0) {
+		if (description !== "" && stringValue !== "") {
 			firebase
 				.database()
 				.ref("Release")
@@ -324,7 +324,7 @@ const Releases = () => {
 				.child(key)
 				.update({
 					description,
-					value,
+					value: parseFloat(stringValue.replace(",", ".")).toFixed(2),
 				})
 				.then(() => {
 					notification.open({
@@ -335,7 +335,7 @@ const Releases = () => {
 					setEditIsModalOpen(false)
 					setIsOpen(-1)
 					setDescription("")
-					setValue(0)
+					setStringValue("")
 				})
 				.catch((error) => {
 					console.log(error)
@@ -396,17 +396,19 @@ const Releases = () => {
 							</h1>
 							<div className="flex">
 								<p className="pr-1">Sálario:</p>
-								<p>R${salary}</p>
+								<p>R${String(salary).replace(".", ",")}</p>
 							</div>
 							<div className="flex">
 								<p className="pr-1">Total de dispesas:</p>
-								<p>R${expenses}</p>
+								<p>R${expenses.toFixed(2).replace(".", ",")}</p>
 							</div>
 							<div className="flex">
 								<p className="pr-1">
 									{expenses > salary ? "Negativo" : "Sobrando"}:
 								</p>
-								<p>R${salary - expenses}</p>
+								<p>
+									R${String((salary - expenses).toFixed(2)).replace(".", ",")}
+								</p>
 							</div>
 						</div>
 						<Menu
@@ -464,15 +466,16 @@ const Releases = () => {
 										<div className="mt-3 flex justify-between pl-5 text-lg leading-3 pb-3">
 											<div>
 												<h1 className="text-[#3a3a3a]">
-													Total destinado:{" "}
+													Total destinado:
 													<span className="text-[#2a2a2a]">
-														R${totalDestined}
+														R$
+														{String(totalDestined).replace(".", ",")}
 													</span>
 												</h1>
 												<h1 className="text-[#3a3a3a]">
-													Total de gastos:{" "}
+													Total de gastos:
 													<span className="text-[#2a2a2a]">
-														R${totalExpenses}
+														R${totalExpenses.toFixed(2).replace(".", ",")}
 													</span>
 												</h1>
 												<h1 className="text-[#3a3a3a]">
@@ -480,7 +483,9 @@ const Releases = () => {
 														? "Negativo"
 														: "Sobrando"}
 													:
-													<span className="text-[#2a2a2a]"> R${remaining}</span>
+													<span className="text-[#2a2a2a]">
+														R${remaining.toFixed(2).replace(".", ",")}
+													</span>
 												</h1>
 											</div>
 
@@ -507,7 +512,7 @@ const Releases = () => {
 															<h1>
 																Valor:{" "}
 																<span className="text-[#fff] px-1 rounded-sm">
-																	R${r.value}
+																	R${String(r.value).replace(".", ",")}
 																</span>
 															</h1>
 															<h1>
@@ -523,7 +528,9 @@ const Releases = () => {
 																onClick={() => {
 																	setEditIsModalOpen(true)
 																	setDescription(r.description)
-																	setValue(r.value)
+																	setStringValue(
+																		String(r.value).replace(".", ",")
+																	)
 																	setKey(r.key)
 																}}>
 																<Icon path={mdiLeadPencil} size={1} />
@@ -539,6 +546,8 @@ const Releases = () => {
 															open={editIsModalOpen}
 															onCancel={() => {
 																setEditIsModalOpen(false)
+																setDescription("")
+																setStringValue("")
 																setError("")
 															}}
 															onOk={() => editRelease()}>
@@ -555,16 +564,15 @@ const Releases = () => {
 																	className="w-[28rem] sm:w-60"
 																/>
 																<h1 className="mt-5">Valor</h1>
-																<InputNumber
-																	addonBefore="+"
-																	addonAfter="$"
-																	defaultValue={100}
-																	value={value}
-																	onChange={(value) => {
-																		setValue(value)
+																<Input
+																	addonBefore="$"
+																	allowClear={true}
+																	value={stringValue}
+																	onChange={(event) => {
+																		setStringValue(event.target.value)
 																		setError("")
 																	}}
-																	className="w-[10rem] sm:w-[8rem]"
+																	style={{ width: "10rem" }}
 																/>
 															</div>
 														</Modal>
@@ -577,6 +585,8 @@ const Releases = () => {
 											open={isModalOpen}
 											onCancel={() => {
 												setIsModalOpen(false)
+												setDescription("")
+												setStringValue("")
 												setError("")
 											}}
 											onOk={() => addNewRelease()}>
@@ -593,16 +603,15 @@ const Releases = () => {
 													className="w-[28rem] sm:w-60"
 												/>
 												<h1 className="mt-5">Valor</h1>
-												<InputNumber
-													addonBefore="+"
-													addonAfter="$"
-													defaultValue={100}
-													value={value}
-													onChange={(value) => {
-														setValue(value)
+												<Input
+													addonBefore="$"
+													allowClear={true}
+													value={stringValue}
+													onChange={(event) => {
+														setStringValue(event.target.value)
 														setError("")
 													}}
-													className="w-[10rem] sm:w-[8rem]"
+													style={{ width: "10rem" }}
 												/>
 											</div>
 										</Modal>

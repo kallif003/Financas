@@ -130,7 +130,7 @@ const MenuInformations = () => {
             >
                 <SubMenu
                     key={1}
-                    title="Informações"
+                    title="Salário"
                     onTitleClick={setDisabledButton}
                     style={
                         {
@@ -148,7 +148,6 @@ const MenuInformations = () => {
                                     margin: '0px'
                                 }}>
                             <div className="flex flex-row justify-between">
-                                <p>Salario</p>
                                 <p>{`R$${s.salary}`}</p>
                                 <SecondaryButton margin={-1} onClick={() => setEditeModal(true)}>
                                     <Icon
@@ -170,7 +169,7 @@ const MenuInformations = () => {
                                         defaultValue={100}
                                         value={salary}
                                         onChange={(value) => setSalary(value)}
-                                        style={{ width: '8rem' }}
+                                        style={{ width: '12rem' }}
                                     />
                                 </div>
                             </Modal>

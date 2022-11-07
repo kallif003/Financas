@@ -68,9 +68,6 @@ const MenuCategories = () => {
                     message: 'Sucesso',
                     description: 'Categoria deletada!',
                     icon: <SmileOutlined style={{ color: "#00C897" }} />,
-                    onClick: () => {
-                        console.log('Notification Clicked!');
-                    },
                 });
             }).catch((error) => {
                 console.log(error)
@@ -103,9 +100,6 @@ const MenuCategories = () => {
                         message: 'Sucesso',
                         description: 'Categoria editada!',
                         icon: <SmileOutlined style={{ color: "#00C897" }} />,
-                        onClick: () => {
-                            console.log('Notification Clicked!');
-                        },
                     });
                 }).catch((error) => {
                     console.log(error)
@@ -213,7 +207,8 @@ const MenuCategories = () => {
                                 </SecondaryButton>
                             </div>
 
-                            <Modal title="Editar Categorias"
+                            <Modal 
+                                title="Editar Categorias"
                                 open={editeModal}
                                 onCancel={() => { setEditeModal(false); setCategory(""); setDestinedValue(0) }}
                                 onOk={() => handleEdite()}
